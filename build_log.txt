@@ -1,0 +1,42 @@
+  0s jaspr_builder:codec_bundle on 116 inputs; $sdk|lib/$lib$
+  0s jaspr_builder:styles_bundle on 116 inputs; $sdk|lib/$lib$
+  0s jaspr_builder:clients_bundle on 116 inputs; $sdk|lib/$lib$
+  0s jaspr_builder:codec_module on 3914 inputs; collection|lib/algorithms.dart
+  0s jaspr_builder:codec_module on 3914 inputs: 1 skipped; collection|lib/collection.dart
+  0s jaspr_builder:styles_module on 4005 inputs; collection|lib/algorithms.dart
+  0s jaspr_builder:client_module on 4008 inputs; collection|lib/algorithms.dart
+  0s retrofit_generator on 25 inputs; lib/app.dart
+  0s retrofit_generator on 25 inputs: 25 skipped
+  0s freezed on 25 inputs; lib/app.dart
+  0s freezed on 25 inputs: 25 skipped
+  0s json_serializable on 50 inputs; lib/app.dart
+  0s json_serializable on 50 inputs: 50 skipped
+  0s source_gen:combining_builder on 50 inputs; lib/app.dart
+  0s source_gen:combining_builder on 50 inputs: 50 skipped
+  0s jaspr_tailwind:compiler on 1 input; web/styles.tw.css
+  0s jaspr_tailwind:compiler on 1 input: 1 skipped
+  0s jaspr_builder:codec_module on 3914 inputs: 3914 skipped
+  0s jaspr_builder:codec_bundle on 116 inputs: 116 skipped
+  0s jaspr_builder:sync_mixins_module on 100 inputs; lib/app.dart
+  0s jaspr_builder:sync_mixins_module on 100 inputs: 100 skipped
+  0s jaspr_builder:styles_module on 4005 inputs: 4005 skipped
+  0s jaspr_builder:styles_bundle on 116 inputs: 116 skipped
+  0s jaspr_builder:imports_module on 200 inputs; lib/app.dart
+  0s jaspr_builder:imports_module on 200 inputs: 200 skipped
+  0s jaspr_builder:stub on 1 input; lib/$lib$
+  0s jaspr_builder:stub on 1 input: 1 skipped
+  0s jaspr_builder:client_module on 4008 inputs: 4008 skipped
+  0s jaspr_builder:clients_bundle on 116 inputs: 116 skipped
+  0s jaspr_builder:import_output on 200 inputs; lib/app.freezed.g.imports.json
+  0s jaspr_builder:import_output on 200 inputs: 200 skipped
+  0s jaspr_builder:client_options on 1 input; lib/main.client.dart
+  0s jaspr_builder:client_options on 1 input: 1 skipped
+  0s jaspr_builder:client_entrypoint on 1 input; lib/main.client.dart
+  0s jaspr_builder:client_entrypoint on 1 input: 1 skipped
+  0s build_web_compilers:entrypoint_marker on 1 input; web/$web$
+  0s build_web_compilers:entrypoint_marker on 1 input: 1 skipped
+  0s build_web_compilers:entrypoint on 1 input; web/main.client.dart
+  0s build_web_compilers:entrypoint on 1 input: 1 skipped
+E jaspr_tailwind:compiler on web/styles.tw.css:
+  PathNotFoundException: Cannot open file, path = '/private/var/folders/0c/y8sqrfmx1xn8gy4mv8pzkk4r0000gn/T/scratch_spacegNpjc3/web/styles.css' (OS Error: No such file or directory, errno = 2)
+  Failed to build with build_runner/jit in 4s; wrote 0 outputs.
