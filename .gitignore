@@ -6,7 +6,6 @@
 # Conventional directory for build output.
 /build/
 # pubspec.lock - committed for reproducible builds
-pubspec.lock
 # Miscellaneous
 *.class
 *.log
