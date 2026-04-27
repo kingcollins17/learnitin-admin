@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:learnitin_admin/models/course.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:learnitin_admin/models/auth/login_response.dart';
 import 'package:learnitin_admin/models/user.dart';

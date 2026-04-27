@@ -6,28 +6,104 @@ part of 'course.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+CourseCategory _$CourseCategoryFromJson(Map<String, dynamic> json) =>
+    CourseCategory(
+      name: json['name'] as String?,
+      description: json['description'] as String?,
+      id: (json['id'] as num?)?.toInt(),
+      createdAt: json['created_at'] == null
+          ? null
+          : DateTime.parse(json['created_at'] as String),
+    );
+
+Map<String, dynamic> _$CourseCategoryToJson(CourseCategory instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'description': instance.description,
+      'id': instance.id,
+      'created_at': instance.createdAt?.toIso8601String(),
+    };
+
+CourseSubCategory _$CourseSubCategoryFromJson(Map<String, dynamic> json) =>
+    CourseSubCategory(
+      name: json['name'] as String?,
+      description: json['description'] as String?,
+      categoryId: (json['category_id'] as num?)?.toInt(),
+      id: (json['id'] as num?)?.toInt(),
+      createdAt: json['created_at'] == null
+          ? null
+          : DateTime.parse(json['created_at'] as String),
+    );
+
+Map<String, dynamic> _$CourseSubCategoryToJson(CourseSubCategory instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'description': instance.description,
+      'category_id': instance.categoryId,
+      'id': instance.id,
+      'created_at': instance.createdAt?.toIso8601String(),
+    };
+
+ReviewSummary _$ReviewSummaryFromJson(Map<String, dynamic> json) =>
+    ReviewSummary(
+      averageRating: (json['average_rating'] as num?)?.toDouble(),
+      totalReviews: (json['total_reviews'] as num?)?.toInt(),
+    );
+
+Map<String, dynamic> _$ReviewSummaryToJson(ReviewSummary instance) =>
+    <String, dynamic>{
+      'average_rating': instance.averageRating,
+      'total_reviews': instance.totalReviews,
+    };
+
 Course _$CourseFromJson(Map<String, dynamic> json) => Course(
   id: (json['id'] as num?)?.toInt(),
   title: json['title'] as String?,
   description: json['description'] as String?,
-  category: json['category'] as String?,
-  enrollments: (json['enrollments'] as num?)?.toInt(),
-  rating: (json['rating'] as num?)?.toDouble(),
-  completionRate: (json['completion_rate'] as num?)?.toDouble(),
-  creatorId: (json['creator_id'] as num?)?.toInt(),
+  duration: json['duration'] as String?,
+  imageUrl: json['image_url'] as String?,
+  isPublic: json['is_public'] as bool?,
+  categoryId: (json['category_id'] as num?)?.toInt(),
+  subCategoryId: (json['sub_category_id'] as num?)?.toInt(),
+  userId: (json['user_id'] as num?)?.toInt(),
+  level: json['level'] as String?,
+  learningPace: json['learning_pace'] as String?,
+  totalEnrollees: (json['total_enrollees'] as num?)?.toInt(),
   createdAt: json['created_at'] == null
       ? null
       : DateTime.parse(json['created_at'] as String),
+  updatedAt: json['updated_at'] == null
+      ? null
+      : DateTime.parse(json['updated_at'] as String),
+  category: json['category'] == null
+      ? null
+      : CourseCategory.fromJson(json['category'] as Map<String, dynamic>),
+  subCategory: json['sub_category'] == null
+      ? null
+      : CourseSubCategory.fromJson(
+          json['sub_category'] as Map<String, dynamic>,
+        ),
+  reviewSummary: json['review_summary'] == null
+      ? null
+      : ReviewSummary.fromJson(json['review_summary'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$CourseToJson(Course instance) => <String, dynamic>{
   'id': instance.id,
   'title': instance.title,
   'description': instance.description,
-  'category': instance.category,
-  'enrollments': instance.enrollments,
-  'rating': instance.rating,
-  'completion_rate': instance.completionRate,
-  'creator_id': instance.creatorId,
+  'duration': instance.duration,
+  'image_url': instance.imageUrl,
+  'is_public': instance.isPublic,
+  'category_id': instance.categoryId,
+  'sub_category_id': instance.subCategoryId,
+  'user_id': instance.userId,
+  'level': instance.level,
+  'learning_pace': instance.learningPace,
+  'total_enrollees': instance.totalEnrollees,
   'created_at': instance.createdAt?.toIso8601String(),
+  'updated_at': instance.updatedAt?.toIso8601String(),
+  'category': instance.category,
+  'sub_category': instance.subCategory,
+  'review_summary': instance.reviewSummary,
 };

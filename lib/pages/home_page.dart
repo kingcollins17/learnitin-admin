@@ -10,8 +10,10 @@ import '../providers/dashboard_provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/admin_stats_provider.dart';
 import '../providers/admin_user_provider.dart';
+import '../providers/admin_course_provider.dart';
 import '../models/paginated_response.dart';
 import '../models/user.dart';
+import '../models/course.dart';
 import '../providers/auth_provider.dart';
 
 class Home extends StatefulComponent {
@@ -130,7 +132,7 @@ class _HomeState extends State<Home> {
       div(classes: 'grid grid-cols-1 xl:grid-cols-3 gap-6', [
         // Top Courses — 2/3 width
         div(classes: 'xl:col-span-2', [
-          _TopCourses(courses: dashboardData.topCourses),
+          const _TopCoursesSection(),
         ]),
 
         // Quick Stats / Server Info
@@ -655,15 +657,16 @@ class _RecentUsersTable extends StatelessComponent {
 // ══════════════════════════════════════════════════════════════════
 
 // ══════════════════════════════════════════════════════════════════
-//  TOP COURSES
+//  TOP COURSES (API-driven)
 // ══════════════════════════════════════════════════════════════════
 
-class _TopCourses extends StatelessComponent {
-  final List<CourseItem> courses;
-  const _TopCourses({required this.courses});
+class _TopCoursesSection extends StatelessComponent {
+  const _TopCoursesSection();
 
   @override
   Component build(BuildContext context) {
+    final coursesAsync = context.watch(adminCourseProvider);
+
     return div(classes: 'card', [
       div(classes: 'flex items-center justify-between mb-6', [
         div(classes: 'space-y-1', [
@@ -677,22 +680,55 @@ class _TopCourses extends StatelessComponent {
         ),
       ]),
 
-      div(classes: 'space-y-3', [
-        for (var i = 0; i < courses.length; i++) _CourseRow(course: courses[i], rank: i + 1),
-      ]),
+      coursesAsync.when(
+        data: (data) {
+          final courses = data?.items ?? [];
+          if (courses.isEmpty) {
+            return div(classes: 'py-12 text-center', [
+              span(classes: 'text-3xl block mb-2', [Component.text('📚')]),
+              p(classes: 'text-dark-muted text-sm', [Component.text('No courses available yet.')]),
+            ]);
+          }
+          // Take top 5 courses by enrollment for the dashboard widget
+          final topCourses = List<Course>.from(courses)
+            ..sort((a, b) => (b.totalEnrollees ?? 0).compareTo(a.totalEnrollees ?? 0));
+          final displayCourses = topCourses.take(5).toList();
+
+          return div(classes: 'space-y-3', [
+            for (var i = 0; i < displayCourses.length; i++)
+              _CourseRow(course: displayCourses[i], rank: i + 1),
+          ]);
+        },
+        loading: () => div(classes: 'space-y-3', [
+          for (var i = 0; i < 5; i++)
+            div(classes: 'flex items-center space-x-4 p-3 rounded-xl animate-pulse', [
+              div(classes: 'w-8 h-8 rounded-lg bg-dark-border/30 shrink-0', []),
+              div(classes: 'flex-1 space-y-2', [
+                div(classes: 'w-3/4 h-4 bg-dark-border/30 rounded', []),
+                div(classes: 'w-1/2 h-3 bg-dark-border/30 rounded', []),
+              ]),
+              div(classes: 'w-16 h-8 bg-dark-border/30 rounded shrink-0', []),
+            ]),
+        ]),
+        error: (e, st) => div(classes: 'py-8 text-center', [
+          span(classes: 'text-2xl block mb-2', [Component.text('⚠️')]),
+          p(classes: 'text-red-400 text-sm', [Component.text(e.toFriendlyMessage())]),
+        ]),
+      ),
     ]);
   }
 }
 
 class _CourseRow extends StatelessComponent {
-  final CourseItem course;
+  final Course course;
   final int rank;
 
   const _CourseRow({required this.course, required this.rank});
 
   @override
   Component build(BuildContext context) {
-    final completionPercent = (course.completionRate * 100).round();
+    final enrollees = course.totalEnrollees ?? 0;
+    final rating = course.reviewSummary?.averageRating ?? 0.0;
 
     return div(
       classes: 'flex items-center space-x-4 p-3 rounded-xl hover:bg-white/[0.02] transition-colors -mx-3 group',
@@ -707,13 +743,19 @@ class _CourseRow extends StatelessComponent {
 
         // Course info
         div(classes: 'flex-1 min-w-0', [
-          p(classes: 'text-sm font-semibold text-white truncate', [Component.text(course.title)]),
+          p(classes: 'text-sm font-semibold text-white truncate', [
+            Component.text(course.title ?? 'Untitled'),
+          ]),
           div(classes: 'flex items-center space-x-3 mt-1', [
             span(classes: 'text-xs px-2 py-0.5 rounded-md bg-dark-border/50 text-dark-muted', [
-              Component.text(course.category),
+              Component.text(course.category?.name ?? 'Uncategorized'),
             ]),
+            if (course.level != null)
+              span(classes: 'text-xs text-dark-muted capitalize', [
+                Component.text(course.level!),
+              ]),
             span(classes: 'text-xs text-dark-muted', [
-              Component.text('⭐ ${course.rating}'),
+              Component.text('⭐ ${rating.toStringAsFixed(1)}'),
             ]),
           ]),
         ]),
@@ -721,23 +763,19 @@ class _CourseRow extends StatelessComponent {
         // Enrollment count
         div(classes: 'text-right shrink-0 hidden sm:block', [
           p(classes: 'text-sm font-bold text-white', [
-            Component.text('${(course.enrollments / 1000).toStringAsFixed(1)}K'),
+            Component.text(enrollees >= 1000
+                ? '${(enrollees / 1000).toStringAsFixed(1)}K'
+                : enrollees.toString()),
           ]),
           p(classes: 'text-xs text-dark-muted', [Component.text('enrolled')]),
         ]),
 
-        // Completion bar
-        div(classes: 'w-24 shrink-0 hidden md:block', [
-          div(classes: 'flex items-center justify-between mb-1', [
-            span(classes: 'text-xs text-dark-muted', [Component.text('$completionPercent%')]),
+        // Reviews count
+        div(classes: 'w-24 shrink-0 hidden md:block text-right', [
+          p(classes: 'text-xs font-bold text-white', [
+            Component.text('${course.reviewSummary?.totalReviews ?? 0}'),
           ]),
-          div(classes: 'w-full h-1.5 bg-dark-border rounded-full overflow-hidden', [
-            div(
-              classes: 'h-full rounded-full bg-gradient-to-r from-primary-600 to-primary transition-all duration-500',
-              styles: Styles(raw: {'width': '$completionPercent%'}),
-              [],
-            ),
-          ]),
+          p(classes: 'text-[10px] text-dark-muted', [Component.text('reviews')]),
         ]),
       ],
     );

@@ -13,12 +13,16 @@ class PaginatedData<T> {
   final int totalPages;
 
   PaginatedData({
-    required this.items,
-    required this.total,
-    required this.page,
-    required this.perPage,
-    required this.totalPages,
-  });
+    List<T>? items,
+    int? total,
+    int? page,
+    int? perPage,
+    int? totalPages,
+  })  : items = items ?? [],
+        total = total ?? 0,
+        page = page ?? 1,
+        perPage = perPage ?? 10,
+        totalPages = totalPages ?? 1;
 
   factory PaginatedData.fromJson(
     Map<String, dynamic> json,

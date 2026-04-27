@@ -10,11 +10,11 @@ PaginatedData<T> _$PaginatedDataFromJson<T>(
   Map<String, dynamic> json,
   T Function(Object? json) fromJsonT,
 ) => PaginatedData<T>(
-  items: (json['items'] as List<dynamic>).map(fromJsonT).toList(),
-  total: (json['total'] as num).toInt(),
-  page: (json['page'] as num).toInt(),
-  perPage: (json['per_page'] as num).toInt(),
-  totalPages: (json['total_pages'] as num).toInt(),
+  items: (json['items'] as List<dynamic>?)?.map(fromJsonT).toList(),
+  total: (json['total'] as num?)?.toInt(),
+  page: (json['page'] as num?)?.toInt(),
+  perPage: (json['per_page'] as num?)?.toInt(),
+  totalPages: (json['total_pages'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$PaginatedDataToJson<T>(
