@@ -6,7 +6,7 @@ dev:
 
 # Build for production
 build:
-	jaspr build
+	export PATH="$$PATH":"$$HOME/.pub-cache/bin" && jaspr build
 
 # Run code generation (freezed, json_serializable)
 gen:
