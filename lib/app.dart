@@ -10,6 +10,7 @@ import 'pages/home_page.dart';
 import 'pages/login_page.dart';
 import 'pages/courses_list_page.dart';
 import 'pages/users_list_page.dart';
+import 'pages/logs_list_page.dart';
 import 'providers/auth_provider.dart';
 
 import 'core/utils/context_extensions.dart';
@@ -71,6 +72,11 @@ class App extends StatelessComponent {
                 path: '/users',
                 title: 'Users',
                 builder: (context, state) => const UsersListPage(),
+              ),
+              Route(
+                path: '/logs',
+                title: 'System Logs',
+                builder: (context, state) => const LogsListPage(),
               ),
             ],
           ),

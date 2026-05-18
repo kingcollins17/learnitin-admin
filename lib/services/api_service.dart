@@ -6,6 +6,7 @@ import 'package:learnitin_admin/models/admin_stats.dart';
 import 'package:learnitin_admin/models/generic_api_response.dart';
 import 'package:learnitin_admin/models/course.dart';
 import 'package:learnitin_admin/models/paginated_response.dart';
+import 'package:learnitin_admin/models/log_entry.dart';
 
 part 'api_service.g.dart';
 
@@ -111,5 +112,23 @@ abstract class ApiService {
   @POST('/admin/notifications/broadcast')
   Future<GenericApiResponse<dynamic>> broadcastNotification({
     @Body() required Map<String, dynamic> body,
+  });
+
+  /// Retrieves system or application logs with pagination and optional level filtering.
+  @GET('/logs/')
+  Future<GenericApiResponse<List<LogEntry>>> getLogs({
+    @Query('page') int? page,
+    @Query('per_page') int? perPage,
+    @Query('level') String? level,
+  });
+
+  /// Clears all system or application logs.
+  @DELETE('/logs/')
+  Future<GenericApiResponse<dynamic>> clearLogs();
+
+  /// Deletes a specific log entry by its ID.
+  @DELETE('/logs/{log_id}')
+  Future<GenericApiResponse<dynamic>> deleteLog({
+    @Path('log_id') required int logId,
   });
 }
