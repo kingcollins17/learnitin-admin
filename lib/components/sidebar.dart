@@ -36,6 +36,12 @@ class Sidebar extends StatelessComponent {
           active: activePath == '/courses',
         ),
         _SidebarLink(
+          icon: '🏷️',
+          label: 'Categories',
+          path: '/categories',
+          active: activePath == '/categories',
+        ),
+        _SidebarLink(
           icon: '👥',
           label: 'Users',
           path: '/users',
