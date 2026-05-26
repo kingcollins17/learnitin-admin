@@ -11,6 +11,7 @@ import 'pages/login_page.dart';
 import 'pages/courses_list_page.dart';
 import 'pages/users_list_page.dart';
 import 'pages/logs_list_page.dart';
+import 'pages/app_configs_page.dart';
 import 'providers/auth_provider.dart';
 
 import 'core/utils/context_extensions.dart';
@@ -43,15 +44,16 @@ class App extends StatelessComponent {
             builder: (context, state) => const LoginPage(),
           ),
           ShellRoute(
-            builder: (context, state, child) => div(classes: 'flex h-screen w-full bg-dark-bg text-white overflow-hidden', [
-              const Sidebar(),
-              div(classes: 'flex-1 flex flex-col min-w-0', [
-                const Header(),
-                div(id: 'main-content', classes: 'flex-1 p-8 overflow-y-auto', [
-                  child,
+            builder: (context, state, child) =>
+                div(classes: 'flex h-screen w-full bg-dark-bg text-white overflow-hidden', [
+                  const Sidebar(),
+                  div(classes: 'flex-1 flex flex-col min-w-0', [
+                    const Header(),
+                    div(id: 'main-content', classes: 'flex-1 p-8 overflow-y-auto', [
+                      child,
+                    ]),
+                  ]),
                 ]),
-              ]),
-            ]),
             routes: [
               Route(
                 path: '/',
@@ -77,6 +79,12 @@ class App extends StatelessComponent {
                 path: '/logs',
                 title: 'System Logs',
                 builder: (context, state) => const LogsListPage(),
+              ),
+              Route(
+                path: '/configs',
+                title: 'App Configs',
+                name: 'appConfigs',
+                builder: (context, state) => const AppConfigsPage(),
               ),
             ],
           ),

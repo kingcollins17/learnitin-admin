@@ -56,6 +56,14 @@ class _HomeState extends State<Home> {
 
     final dashboardData = context.watch(dashboardProvider);
     final userAsync = context.watch(currentUserProvider);
+    if (userAsync is AsyncError) {
+      Future.microtask(() async {
+        await context.read(authProvider.notifier).logout();
+        Router.of(context).replace('/login');
+      });
+      return div([]);
+    }
+
     final statsAsync = context.watch(adminStatsProvider);
 
     return div(classes: 'space-y-8 pb-8', [
@@ -695,8 +703,7 @@ class _TopCoursesSection extends StatelessComponent {
           final displayCourses = topCourses.take(5).toList();
 
           return div(classes: 'space-y-3', [
-            for (var i = 0; i < displayCourses.length; i++)
-              _CourseRow(course: displayCourses[i], rank: i + 1),
+            for (var i = 0; i < displayCourses.length; i++) _CourseRow(course: displayCourses[i], rank: i + 1),
           ]);
         },
         loading: () => div(classes: 'space-y-3', [
@@ -763,9 +770,7 @@ class _CourseRow extends StatelessComponent {
         // Enrollment count
         div(classes: 'text-right shrink-0 hidden sm:block', [
           p(classes: 'text-sm font-bold text-white', [
-            Component.text(enrollees >= 1000
-                ? '${(enrollees / 1000).toStringAsFixed(1)}K'
-                : enrollees.toString()),
+            Component.text(enrollees >= 1000 ? '${(enrollees / 1000).toStringAsFixed(1)}K' : enrollees.toString()),
           ]),
           p(classes: 'text-xs text-dark-muted', [Component.text('enrolled')]),
         ]),
