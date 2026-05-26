@@ -107,3 +107,55 @@ Map<String, dynamic> _$CourseToJson(Course instance) => <String, dynamic>{
   'sub_category': instance.subCategory,
   'review_summary': instance.reviewSummary,
 };
+
+CategoryCreate _$CategoryCreateFromJson(Map<String, dynamic> json) =>
+    CategoryCreate(
+      name: json['name'] as String?,
+      description: json['description'] as String?,
+    );
+
+Map<String, dynamic> _$CategoryCreateToJson(CategoryCreate instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'description': instance.description,
+    };
+
+CategoryUpdate _$CategoryUpdateFromJson(Map<String, dynamic> json) =>
+    CategoryUpdate(
+      name: json['name'] as String?,
+      description: json['description'] as String?,
+    );
+
+Map<String, dynamic> _$CategoryUpdateToJson(CategoryUpdate instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'description': instance.description,
+    };
+
+SubCategoryCreate _$SubCategoryCreateFromJson(Map<String, dynamic> json) =>
+    SubCategoryCreate(
+      name: json['name'] as String?,
+      description: json['description'] as String?,
+      categoryId: (json['category_id'] as num?)?.toInt(),
+    );
+
+Map<String, dynamic> _$SubCategoryCreateToJson(SubCategoryCreate instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'description': instance.description,
+      'category_id': instance.categoryId,
+    };
+
+SubCategoryUpdate _$SubCategoryUpdateFromJson(Map<String, dynamic> json) =>
+    SubCategoryUpdate(
+      name: json['name'] as String?,
+      description: json['description'] as String?,
+      categoryId: (json['category_id'] as num?)?.toInt(),
+    );
+
+Map<String, dynamic> _$SubCategoryUpdateToJson(SubCategoryUpdate instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'description': instance.description,
+      'category_id': instance.categoryId,
+    };

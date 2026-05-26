@@ -12,6 +12,7 @@ import 'pages/courses_list_page.dart';
 import 'pages/users_list_page.dart';
 import 'pages/logs_list_page.dart';
 import 'pages/app_configs_page.dart';
+import 'pages/categories_page.dart';
 import 'providers/auth_provider.dart';
 
 import 'core/utils/context_extensions.dart';
@@ -69,6 +70,11 @@ class App extends StatelessComponent {
                 path: '/courses',
                 title: 'Courses',
                 builder: (context, state) => const CoursesListPage(),
+              ),
+              Route(
+                path: '/categories',
+                title: 'Categories',
+                builder: (context, state) => const CategoriesPage(),
               ),
               Route(
                 path: '/users',

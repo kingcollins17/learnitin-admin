@@ -113,3 +113,52 @@ class Course {
   factory Course.fromJson(Map<String, dynamic> json) => _$CourseFromJson(json);
   Map<String, dynamic> toJson() => _$CourseToJson(this);
 }
+
+@JsonSerializable()
+class CategoryCreate {
+  final String? name;
+  final String? description;
+
+  const CategoryCreate({this.name, this.description});
+
+  factory CategoryCreate.fromJson(Map<String, dynamic> json) => _$CategoryCreateFromJson(json);
+  Map<String, dynamic> toJson() => _$CategoryCreateToJson(this);
+}
+
+@JsonSerializable()
+class CategoryUpdate {
+  final String? name;
+  final String? description;
+
+  const CategoryUpdate({this.name, this.description});
+
+  factory CategoryUpdate.fromJson(Map<String, dynamic> json) => _$CategoryUpdateFromJson(json);
+  Map<String, dynamic> toJson() => _$CategoryUpdateToJson(this);
+}
+
+@JsonSerializable()
+class SubCategoryCreate {
+  final String? name;
+  final String? description;
+  @JsonKey(name: 'category_id')
+  final int? categoryId;
+
+  const SubCategoryCreate({this.name, this.description, this.categoryId});
+
+  factory SubCategoryCreate.fromJson(Map<String, dynamic> json) => _$SubCategoryCreateFromJson(json);
+  Map<String, dynamic> toJson() => _$SubCategoryCreateToJson(this);
+}
+
+@JsonSerializable()
+class SubCategoryUpdate {
+  final String? name;
+  final String? description;
+  @JsonKey(name: 'category_id')
+  final int? categoryId;
+
+  const SubCategoryUpdate({this.name, this.description, this.categoryId});
+
+  factory SubCategoryUpdate.fromJson(Map<String, dynamic> json) => _$SubCategoryUpdateFromJson(json);
+  Map<String, dynamic> toJson() => _$SubCategoryUpdateToJson(this);
+}
+

@@ -159,4 +159,52 @@ abstract class ApiService {
     @Path('config_id') required int configId,
   });
   // ------------------------------------------------
+
+  // MARK: Category & Sub Categories Management
+  @POST('/courses/categories')
+  Future<GenericApiResponse<CourseCategory>> createCategory({
+    @Body() required CategoryCreate body,
+  });
+
+  @GET('/courses/categories')
+  Future<GenericApiResponse<List<CourseCategory>>> getCategories({
+    @Query('page') int? page,
+    @Query('per_page') int? perPage,
+    @Query('search') String? search,
+  });
+
+  @PATCH('/courses/categories/{category_id}')
+  Future<GenericApiResponse<CourseCategory>> updateCategory({
+    @Path('category_id') required int categoryId,
+    @Body() required CategoryUpdate body,
+  });
+
+  @DELETE('/courses/categories/{category_id}')
+  Future<GenericApiResponse<dynamic>> deleteCategory({
+    @Path('category_id') required int categoryId,
+  });
+
+  @POST('/courses/sub-categories')
+  Future<GenericApiResponse<CourseSubCategory>> createSubCategory({
+    @Body() required SubCategoryCreate body,
+  });
+
+  @GET('/courses/sub-categories')
+  Future<GenericApiResponse<List<CourseSubCategory>>> getSubCategories({
+    @Query('page') int? page,
+    @Query('per_page') int? perPage,
+    @Query('category_id') int? categoryId,
+  });
+
+  @PATCH('/courses/sub-categories/{sub_category_id}')
+  Future<GenericApiResponse<CourseSubCategory>> updateSubCategory({
+    @Path('sub_category_id') required int subCategoryId,
+    @Body() required SubCategoryUpdate body,
+  });
+
+  @DELETE('/courses/sub-categories/{sub_category_id}')
+  Future<GenericApiResponse<dynamic>> deleteSubCategory({
+    @Path('sub_category_id') required int subCategoryId,
+  });
+  // ----------------------------------------------------
 }
