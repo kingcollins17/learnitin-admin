@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:learnitin_admin/models/app_config.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:learnitin_admin/models/auth/login_response.dart';
 import 'package:learnitin_admin/models/user.dart';
@@ -131,4 +132,31 @@ abstract class ApiService {
   Future<GenericApiResponse<dynamic>> deleteLog({
     @Path('log_id') required int logId,
   });
+
+  //MARK: Manage App Configs
+  @GET('/app-configs/')
+  Future<GenericApiResponse<List<AppConfig>>> getAppConfigs({
+    @Query('page') int page = 1,
+    @Query('per_page') int perPage = 100,
+  });
+
+  @GET('/app-configs/{key}')
+  Future<GenericApiResponse<AppConfig>> getAppConfigByKey(@Path('key') String key);
+
+  @POST('/app-configs/')
+  Future<GenericApiResponse<AppConfig>> createAppConfig({
+    @Body() required CreateAppConfig body,
+  });
+
+  @PATCH('/app-configs/{config_id}')
+  Future<GenericApiResponse<dynamic>> updateAppConfig({
+    @Path('config_id') required int configId,
+    @Body() required UpdateAppConfig body,
+  });
+
+  @DELETE('/app-configs/{config_id}')
+  Future<GenericApiResponse<dynamic>> deleteAppConfig({
+    @Path('config_id') required int configId,
+  });
+  // ------------------------------------------------
 }

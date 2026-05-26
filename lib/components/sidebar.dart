@@ -47,6 +47,12 @@ class Sidebar extends StatelessComponent {
           path: '/logs',
           active: activePath == '/logs',
         ),
+        _SidebarLink(
+          icon: '⚙️',
+          label: 'App Configs',
+          path: '/configs',
+          active: activePath == '/configs',
+        ),
       ]),
 
       // Footer / Profile

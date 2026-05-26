@@ -6,7 +6,7 @@ import 'package:learnitin_admin/providers/local_storage_provider.dart';
 import 'package:learnitin_admin/services/api_service.dart';
 
 final dioProvider = Provider<Dio>((ref) {
-  final config = EnvironmentConfig();
+  final config = enviroment;
   final localStorage = ref.watch(localStorageProvider);
   final dio = Dio(
     BaseOptions(
