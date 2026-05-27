@@ -92,7 +92,9 @@ class AppConfigsNotifier extends AsyncNotifier<List<AppConfig>> {
   }) async {
     final api = ref.read(apiServiceProvider);
     try {
-      final response = await api.createAppConfig(body: body);
+      final parsedMetadata = body.metadata != null ? _parseConfigMetadata(body.metadata) : null;
+      final parsedBody = body.copyWith(metadata: parsedMetadata);
+      final response = await api.createAppConfig(body: parsedBody);
       if (response.isSuccess) {
         if (state.hasValue) {
           final currentConfigs = state.value ?? [];
@@ -110,6 +112,46 @@ class AppConfigsNotifier extends AsyncNotifier<List<AppConfig>> {
     }
   }
 
+  /// Parse and return config metadata in appropriate json format
+  Map<String, dynamic> _parseConfigMetadata(dynamic value) {
+    final output = <String, dynamic>{};
+    if (value is Map) {
+      value.forEach((key, val) {
+        output[key.toString()] = _parseSingleValue(val);
+      });
+    } else if (value is Iterable) {
+      for (final item in value) {
+        if (item is MapEntry) {
+          output[item.key.toString()] = _parseSingleValue(item.value);
+        }
+      }
+    }
+    return output;
+  }
+
+  dynamic _parseSingleValue(dynamic val) {
+    if (val is String) {
+      final trimmed = val.trim();
+      final lowercase = trimmed.toLowerCase();
+      if (lowercase == 'true') {
+        return true;
+      } else if (lowercase == 'false') {
+        return false;
+      } else {
+        final parsedInt = int.tryParse(trimmed);
+        if (parsedInt != null) {
+          return parsedInt;
+        } else {
+          final parsedDouble = double.tryParse(trimmed);
+          if (parsedDouble != null) {
+            return parsedDouble;
+          }
+        }
+      }
+    }
+    return val;
+  }
+
   /// Updates an existing app configuration.
   ///
   /// Updates local state optimistically upon successful API response.
@@ -122,7 +164,9 @@ class AppConfigsNotifier extends AsyncNotifier<List<AppConfig>> {
   }) async {
     final api = ref.read(apiServiceProvider);
     try {
-      final response = await api.updateAppConfig(configId: configId, body: body);
+      final parsedMetadata = body.metadata != null ? _parseConfigMetadata(body.metadata) : null;
+      final parsedBody = body.copyWith(metadata: parsedMetadata);
+      final response = await api.updateAppConfig(configId: configId, body: parsedBody);
       if (response.isSuccess) {
         if (state.hasValue) {
           final updated = state.value!.map((config) {
@@ -130,7 +174,7 @@ class AppConfigsNotifier extends AsyncNotifier<List<AppConfig>> {
               return config.copyWith(
                 key: body.key ?? config.key,
                 value: body.value ?? config.value,
-                metadata: body.metadata ?? config.metadata,
+                metadata: parsedMetadata ?? config.metadata,
               );
             }
             return config;

@@ -162,15 +162,17 @@ final categoriesProvider = AsyncNotifierProvider.family<CategoriesNotifier, List
 
 /// A notifier that manages the state and CRUD operations for [CourseSubCategory] entities.
 class SubCategoriesNotifier extends AsyncNotifier<List<CourseSubCategory>> {
+  final int categoryId;
+
+  SubCategoriesNotifier({required this.categoryId});
+
   int _page = 1;
   final int _perPage = 20;
   bool _hasMore = true;
-  int? _categoryId;
 
   int get page => _page;
   int get perPage => _perPage;
   bool get hasMore => _hasMore;
-  int? get categoryIdFilter => _categoryId;
 
   @override
   FutureOr<List<CourseSubCategory>> build() async {
@@ -179,19 +181,13 @@ class SubCategoriesNotifier extends AsyncNotifier<List<CourseSubCategory>> {
     return _fetch();
   }
 
-  /// Sets the category filter and refreshes the subcategories.
-  Future<void> setCategoryFilter(int? categoryId) async {
-    _categoryId = categoryId;
-    await refresh();
-  }
-
   Future<List<CourseSubCategory>> _fetch() async {
     final api = ref.read(apiServiceProvider);
     try {
       final response = await api.getSubCategories(
         page: _page,
         perPage: _perPage,
-        categoryId: _categoryId,
+        categoryId: categoryId,
       );
       final subCategories = response.data ?? [];
 
@@ -316,6 +312,6 @@ class SubCategoriesNotifier extends AsyncNotifier<List<CourseSubCategory>> {
   }
 }
 
-final subCategoriesProvider = AsyncNotifierProvider<SubCategoriesNotifier, List<CourseSubCategory>>(() {
-  return SubCategoriesNotifier();
+final subCategoriesProvider = AsyncNotifierProvider.family<SubCategoriesNotifier, List<CourseSubCategory>, int>((categoryId) {
+  return SubCategoriesNotifier(categoryId: categoryId);
 });
