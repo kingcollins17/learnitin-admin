@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'package:jaspr_riverpod/jaspr_riverpod.dart';
+import 'package:jaspr_riverpod/legacy.dart';
 import 'package:learnitin_admin/core/types.dart';
 import 'package:learnitin_admin/core/utils/error_sanitizer.dart';
 import 'package:learnitin_admin/models/course_generation.dart';
 import 'package:learnitin_admin/models/paginated_response.dart';
 import 'package:learnitin_admin/models/course.dart';
 import 'package:learnitin_admin/providers/api_provider.dart';
-
 
 class AdminCourseParams {
   final int page;
@@ -175,3 +175,7 @@ class AdminCourseNotifier extends AsyncNotifier<PaginatedCourses?> {
 final adminCourseProvider = AsyncNotifierProvider<AdminCourseNotifier, PaginatedCourses?>(() {
   return AdminCourseNotifier();
 });
+
+final selectedGeneratedCourseProvider = StateProvider<GeneratedCourse?>((ref) => null);
+
+final editingCourseProvider = StateProvider<Course?>((ref) => null);

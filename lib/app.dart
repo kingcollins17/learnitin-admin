@@ -9,6 +9,7 @@ import 'pages/about.dart';
 import 'pages/home_page.dart';
 import 'pages/login_page.dart';
 import 'pages/courses_list_page.dart';
+import 'pages/course_outline_preview_page.dart';
 import 'pages/users_list_page.dart';
 import 'pages/logs_list_page.dart';
 import 'pages/app_configs_page.dart';
@@ -70,6 +71,11 @@ class App extends StatelessComponent {
                 path: '/courses',
                 title: 'Courses',
                 builder: (context, state) => const CoursesListPage(),
+              ),
+              Route(
+                path: '/courses/preview',
+                title: 'Course Outline Preview',
+                builder: (context, state) => const CourseOutlinePreviewPage(),
               ),
               Route(
                 path: '/categories',
