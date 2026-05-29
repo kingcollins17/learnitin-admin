@@ -1,8 +1,12 @@
 import 'dart:async';
 import 'package:jaspr_riverpod/jaspr_riverpod.dart';
+import 'package:learnitin_admin/core/types.dart';
+import 'package:learnitin_admin/core/utils/error_sanitizer.dart';
+import 'package:learnitin_admin/models/course_generation.dart';
 import 'package:learnitin_admin/models/paginated_response.dart';
 import 'package:learnitin_admin/models/course.dart';
 import 'package:learnitin_admin/providers/api_provider.dart';
+
 
 class AdminCourseParams {
   final int page;
@@ -36,23 +40,22 @@ class AdminCourseParams {
   }
 }
 
-class AdminCourseNotifier extends AsyncNotifier<PaginatedData<Course>?> {
+class AdminCourseNotifier extends AsyncNotifier<PaginatedCourses?> {
   AdminCourseParams _params = const AdminCourseParams();
 
   AdminCourseParams get params => _params;
 
   @override
-  FutureOr<PaginatedData<Course>?> build() async {
+  FutureOr<PaginatedCourses?> build() async {
     return _fetch();
   }
 
-  Future<PaginatedData<Course>?> _fetch() async {
+  Future<PaginatedCourses?> _fetch() async {
     final api = ref.read(apiServiceProvider);
     try {
-      final response = await api.adminListCourses(
+      final response = await api.getCourses(
         page: _params.page,
         perPage: _params.perPage,
-        creatorId: _params.creatorId,
       );
       return response.data;
     } catch (e) {
@@ -89,8 +92,86 @@ class AdminCourseNotifier extends AsyncNotifier<PaginatedData<Course>?> {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() => _fetch());
   }
+
+  Future<GenerateCoursesResponseData?> generateCourseOutline(
+    GenerateCoursesRequest body, {
+    void Function(GenerateCoursesResponseData data)? onSuccess,
+    OnError? onError,
+  }) async {
+    final api = ref.read(apiServiceProvider);
+    try {
+      final response = await api.generateCourseOutline(body: body);
+      if (response.isSuccess) {
+        onSuccess?.call(response.data!);
+        return response.data;
+      } else {
+        throw response.getErrorMsg() ?? 'Failed to generate course outline';
+      }
+    } catch (e, st) {
+      print('Error generating course outline: $e');
+      onError?.call(e.toFriendlyMessage(), st);
+      rethrow;
+    }
+  }
+
+  Future<Course?> createCourse({
+    required GeneratedCourse body,
+    int? categoryId,
+    int? subCategoryId,
+    bool enroll = false,
+    bool isPublic = true,
+    void Function(Course course)? onSuccess,
+    OnError? onError,
+  }) async {
+    final api = ref.read(apiServiceProvider);
+    try {
+      final response = await api.createCourse(
+        body: body,
+        categoryId: categoryId,
+        subCategoryId: subCategoryId,
+        enroll: enroll,
+        isPublic: isPublic,
+      );
+      if (response.isSuccess) {
+        onSuccess?.call(response.data!);
+        await refresh();
+        return response.data;
+      } else {
+        throw response.getErrorMsg() ?? 'Failed to create course';
+      }
+    } catch (e, st) {
+      print('Error creating course: $e');
+      onError?.call(e.toFriendlyMessage(), st);
+      rethrow;
+    }
+  }
+
+  Future<void> updateCourse({
+    required String courseId,
+    required CourseUpdate body,
+    OnSuccess? onSuccess,
+    OnError? onError,
+  }) async {
+    final api = ref.read(apiServiceProvider);
+    try {
+      final response = await api.updateCourse(
+        courseId: courseId,
+        body: body,
+      );
+      if (response.isSuccess) {
+        onSuccess?.call();
+        await refresh();
+      } else {
+        throw response.getErrorMsg() ?? 'Failed to update course';
+      }
+    } catch (e, st) {
+      print('Error updating course: $e');
+      onError?.call(e.toFriendlyMessage(), st);
+      rethrow;
+    }
+  }
 }
 
-final adminCourseProvider = AsyncNotifierProvider<AdminCourseNotifier, PaginatedData<Course>?>(() {
+final adminCourseProvider = AsyncNotifierProvider<AdminCourseNotifier, PaginatedCourses?>(() {
   return AdminCourseNotifier();
 });

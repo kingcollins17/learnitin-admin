@@ -8,6 +8,7 @@ import 'package:learnitin_admin/models/generic_api_response.dart';
 import 'package:learnitin_admin/models/course.dart';
 import 'package:learnitin_admin/models/paginated_response.dart';
 import 'package:learnitin_admin/models/log_entry.dart';
+import 'package:learnitin_admin/models/course_generation.dart';
 
 part 'api_service.g.dart';
 
@@ -88,13 +89,38 @@ abstract class ApiService {
     @Path('user_id') required int userId,
   });
 
-  // ...
-  /// Lists all courses on the platform with pagination and optional filtering by creator ID.
-  @GET('/admin/courses')
-  Future<GenericApiResponse<PaginatedData<Course>>> adminListCourses({
+  // MARK: Courses Management
+  /// Lists all courses on the platform with pagination and optional filters.
+  @GET('/courses')
+  Future<GenericApiResponse<PaginatedCourses>> getCourses({
     @Query('page') int? page,
     @Query('per_page') int? perPage,
-    @Query('creator_id') int? creatorId,
+    @Query('is_public') bool? isPublic,
+    @Query('level') String? level,
+    @Query('min_enrollees') int? minEnrollees,
+    @Query('sort_by_popularity') bool? sortByPopularity,
+  });
+
+  /// Generates a personalized course outline using AI.
+  @POST('/courses/generate')
+  Future<GenericApiResponse<GenerateCoursesResponseData>> generateCourseOutline({
+    @Body() required GenerateCoursesRequest body,
+  });
+
+  /// Creates a new course from a generated outline.
+  @POST('/courses/create')
+  Future<GenericApiResponse<Course>> createCourse({
+    @Body() required GeneratedCourse body,
+    @Query('category_id') int? categoryId,
+    @Query('sub_category_id') int? subCategoryId,
+    @Query('enroll') bool enroll = false,
+    @Query('is_public') bool isPublic = true,
+  });
+
+  @PATCH('/courses/{course_id}')
+  Future<GenericApiResponse> updateCourse({
+    @Path('course_id') required String courseId,
+    @Body() required CourseUpdate body,
   });
 
   /// Sends a notification to a single user.

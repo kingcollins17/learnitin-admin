@@ -325,39 +325,155 @@ class _ApiService implements ApiService {
   }
 
   @override
-  Future<GenericApiResponse<PaginatedData<Course>>> adminListCourses({
+  Future<GenericApiResponse<PaginatedCourses>> getCourses({
     int? page,
     int? perPage,
-    int? creatorId,
+    bool? isPublic,
+    String? level,
+    int? minEnrollees,
+    bool? sortByPopularity,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'page': page,
       r'per_page': perPage,
-      r'creator_id': creatorId,
+      r'is_public': isPublic,
+      r'level': level,
+      r'min_enrollees': minEnrollees,
+      r'sort_by_popularity': sortByPopularity,
     };
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<GenericApiResponse<PaginatedData<Course>>>(
+    final _options = _setStreamType<GenericApiResponse<PaginatedCourses>>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/admin/courses',
+            '/courses',
             queryParameters: queryParameters,
             data: _data,
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late GenericApiResponse<PaginatedData<Course>> _value;
+    late GenericApiResponse<PaginatedCourses> _value;
     try {
-      _value = GenericApiResponse<PaginatedData<Course>>.fromJson(
+      _value = GenericApiResponse<PaginatedCourses>.fromJson(
         _result.data!,
-        (json) => PaginatedData<Course>.fromJson(
-          json as Map<String, dynamic>,
-          (json) => Course.fromJson(json as Map<String, dynamic>),
-        ),
+        (json) => PaginatedCourses.fromJson(json as Map<String, dynamic>),
+      );
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<GenericApiResponse<GenerateCoursesResponseData>>
+  generateCourseOutline({required GenerateCoursesRequest body}) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(body.toJson());
+    final _options =
+        _setStreamType<GenericApiResponse<GenerateCoursesResponseData>>(
+          Options(method: 'POST', headers: _headers, extra: _extra)
+              .compose(
+                _dio.options,
+                '/courses/generate',
+                queryParameters: queryParameters,
+                data: _data,
+              )
+              .copyWith(
+                baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl),
+              ),
+        );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late GenericApiResponse<GenerateCoursesResponseData> _value;
+    try {
+      _value = GenericApiResponse<GenerateCoursesResponseData>.fromJson(
+        _result.data!,
+        (json) =>
+            GenerateCoursesResponseData.fromJson(json as Map<String, dynamic>),
+      );
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<GenericApiResponse<Course>> createCourse({
+    required GeneratedCourse body,
+    int? categoryId,
+    int? subCategoryId,
+    bool enroll = false,
+    bool isPublic = true,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'category_id': categoryId,
+      r'sub_category_id': subCategoryId,
+      r'enroll': enroll,
+      r'is_public': isPublic,
+    };
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(body.toJson());
+    final _options = _setStreamType<GenericApiResponse<Course>>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/courses/create',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late GenericApiResponse<Course> _value;
+    try {
+      _value = GenericApiResponse<Course>.fromJson(
+        _result.data!,
+        (json) => Course.fromJson(json as Map<String, dynamic>),
+      );
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<GenericApiResponse<dynamic>> updateCourse({
+    required String courseId,
+    required CourseUpdate body,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(body.toJson());
+    final _options = _setStreamType<GenericApiResponse<dynamic>>(
+      Options(method: 'PATCH', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/courses/${courseId}',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late GenericApiResponse<dynamic> _value;
+    try {
+      _value = GenericApiResponse<dynamic>.fromJson(
+        _result.data!,
+        (json) => json as dynamic,
       );
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);

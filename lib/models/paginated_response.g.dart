@@ -27,3 +27,21 @@ Map<String, dynamic> _$PaginatedDataToJson<T>(
   'per_page': instance.perPage,
   'total_pages': instance.totalPages,
 };
+
+PaginatedCourses _$PaginatedCoursesFromJson(Map<String, dynamic> json) =>
+    PaginatedCourses(
+      items: (json['courses'] as List<dynamic>?)
+          ?.map((e) => Course.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      total: (json['total'] as num?)?.toInt(),
+      page: (json['page'] as num?)?.toInt(),
+      perPage: (json['per_page'] as num?)?.toInt(),
+    );
+
+Map<String, dynamic> _$PaginatedCoursesToJson(PaginatedCourses instance) =>
+    <String, dynamic>{
+      'courses': instance.items,
+      'total': instance.total,
+      'page': instance.page,
+      'per_page': instance.perPage,
+    };

@@ -82,6 +82,7 @@ Course _$CourseFromJson(Map<String, dynamic> json) => Course(
   category: json['category'] == null
       ? null
       : CourseCategory.fromJson(json['category'] as Map<String, dynamic>),
+  popularityScore: (json['popularity_score'] as num?)?.toDouble(),
   subCategory: json['sub_category'] == null
       ? null
       : CourseSubCategory.fromJson(
@@ -110,13 +111,36 @@ Map<String, dynamic> _$CourseToJson(Course instance) => <String, dynamic>{
   'category': instance.category,
   'sub_category': instance.subCategory,
   'review_summary': instance.reviewSummary,
+  'popularity_score': instance.popularityScore,
 };
+
+CourseUpdate _$CourseUpdateFromJson(Map<String, dynamic> json) => CourseUpdate(
+  title: json['title'] as String?,
+  description: json['description'] as String?,
+  imageUrl: json['image_url'] as String?,
+  duration: json['duration'] as String?,
+  categoryId: (json['category_id'] as num?)?.toInt(),
+  subCategoryId: (json['sub_category_id'] as num?)?.toInt(),
+  popularityScore: (json['popularity_score'] as num?)?.toDouble(),
+);
+
+Map<String, dynamic> _$CourseUpdateToJson(CourseUpdate instance) =>
+    <String, dynamic>{
+      'title': instance.title,
+      'description': instance.description,
+      'image_url': instance.imageUrl,
+      'duration': instance.duration,
+      'category_id': instance.categoryId,
+      'sub_category_id': instance.subCategoryId,
+      'popularity_score': instance.popularityScore,
+    };
 
 CategoryCreate _$CategoryCreateFromJson(Map<String, dynamic> json) =>
     CategoryCreate(
       name: json['name'] as String?,
       description: json['description'] as String?,
       imageUrl: json['image_url'] as String?,
+      popularityScore: (json['popularity_score'] as num?)?.toDouble(),
     );
 
 Map<String, dynamic> _$CategoryCreateToJson(CategoryCreate instance) =>
@@ -124,6 +148,7 @@ Map<String, dynamic> _$CategoryCreateToJson(CategoryCreate instance) =>
       'name': instance.name,
       'description': instance.description,
       'image_url': instance.imageUrl,
+      'popularity_score': instance.popularityScore,
     };
 
 CategoryUpdate _$CategoryUpdateFromJson(Map<String, dynamic> json) =>
@@ -131,6 +156,7 @@ CategoryUpdate _$CategoryUpdateFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String?,
       description: json['description'] as String?,
       imageUrl: json['image_url'] as String?,
+      popularityScore: (json['popularity_score'] as num?)?.toDouble(),
     );
 
 Map<String, dynamic> _$CategoryUpdateToJson(CategoryUpdate instance) =>
@@ -138,6 +164,7 @@ Map<String, dynamic> _$CategoryUpdateToJson(CategoryUpdate instance) =>
       'name': instance.name,
       'description': instance.description,
       'image_url': instance.imageUrl,
+      'popularity_score': instance.popularityScore,
     };
 
 SubCategoryCreate _$SubCategoryCreateFromJson(Map<String, dynamic> json) =>

@@ -2,14 +2,12 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'course.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class CourseCategory {
   final String? name;
   final String? description;
   final int? id;
-  @JsonKey(name: 'created_at')
   final DateTime? createdAt;
-  @JsonKey(name: 'image_url')
   final String? imageUrl;
 
   const CourseCategory({
@@ -24,16 +22,13 @@ class CourseCategory {
   Map<String, dynamic> toJson() => _$CourseCategoryToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class CourseSubCategory {
   final String? name;
   final String? description;
-  @JsonKey(name: 'category_id')
   final int? categoryId;
   final int? id;
-  @JsonKey(name: 'created_at')
   final DateTime? createdAt;
-  @JsonKey(name: 'image_url')
   final String? imageUrl;
 
   const CourseSubCategory({
@@ -49,11 +44,9 @@ class CourseSubCategory {
   Map<String, dynamic> toJson() => _$CourseSubCategoryToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class ReviewSummary {
-  @JsonKey(name: 'average_rating')
   final double? averageRating;
-  @JsonKey(name: 'total_reviews')
   final int? totalReviews;
 
   const ReviewSummary({
@@ -65,36 +58,26 @@ class ReviewSummary {
   Map<String, dynamic> toJson() => _$ReviewSummaryToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class Course {
   final int? id;
   final String? title;
   final String? description;
   final String? duration;
-  @JsonKey(name: 'image_url')
   final String? imageUrl;
-  @JsonKey(name: 'is_public')
   final bool? isPublic;
-  @JsonKey(name: 'category_id')
   final int? categoryId;
-  @JsonKey(name: 'sub_category_id')
   final int? subCategoryId;
-  @JsonKey(name: 'user_id')
   final int? userId;
   final String? level;
-  @JsonKey(name: 'learning_pace')
   final String? learningPace;
-  @JsonKey(name: 'total_enrollees')
   final int? totalEnrollees;
-  @JsonKey(name: 'created_at')
   final DateTime? createdAt;
-  @JsonKey(name: 'updated_at')
   final DateTime? updatedAt;
   final CourseCategory? category;
-  @JsonKey(name: 'sub_category')
   final CourseSubCategory? subCategory;
-  @JsonKey(name: 'review_summary')
   final ReviewSummary? reviewSummary;
+  final double? popularityScore;
 
   const Course({
     this.id,
@@ -112,6 +95,7 @@ class Course {
     this.createdAt,
     this.updatedAt,
     this.category,
+    this.popularityScore,
     this.subCategory,
     this.reviewSummary,
   });
@@ -120,54 +104,78 @@ class Course {
   Map<String, dynamic> toJson() => _$CourseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
+class CourseUpdate {
+  final String? title, description, imageUrl, duration;
+  final int? categoryId, subCategoryId;
+  final double? popularityScore;
+
+  CourseUpdate({
+    this.title,
+    this.description,
+    this.imageUrl,
+    this.duration,
+    this.categoryId,
+    this.subCategoryId,
+    this.popularityScore,
+  });
+  factory CourseUpdate.fromJson(Map<String, dynamic> json) => _$CourseUpdateFromJson(json);
+  Map<String, dynamic> toJson() => _$CourseUpdateToJson(this);
+}
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class CategoryCreate {
   final String? name;
   final String? description;
-  @JsonKey(name: 'image_url')
   final String? imageUrl;
+  final double? popularityScore;
 
-  const CategoryCreate({this.name, this.description, this.imageUrl});
+  const CategoryCreate({this.name, this.description, this.imageUrl, this.popularityScore});
 
   factory CategoryCreate.fromJson(Map<String, dynamic> json) => _$CategoryCreateFromJson(json);
   Map<String, dynamic> toJson() => _$CategoryCreateToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class CategoryUpdate {
   final String? name;
   final String? description;
-  @JsonKey(name: 'image_url')
   final String? imageUrl;
-
-  const CategoryUpdate({this.name, this.description, this.imageUrl});
+  final double? popularityScore;
+  const CategoryUpdate({
+    this.name,
+    this.description,
+    this.imageUrl,
+    this.popularityScore,
+  });
 
   factory CategoryUpdate.fromJson(Map<String, dynamic> json) => _$CategoryUpdateFromJson(json);
   Map<String, dynamic> toJson() => _$CategoryUpdateToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class SubCategoryCreate {
   final String? name;
   final String? description;
-  @JsonKey(name: 'category_id')
   final int? categoryId;
-  @JsonKey(name: 'image_url')
   final String? imageUrl;
 
-  const SubCategoryCreate({this.name, this.description, this.categoryId, this.imageUrl});
+  const SubCategoryCreate({
+    this.name,
+    this.description,
+    this.categoryId,
+    this.imageUrl,
+  });
 
   factory SubCategoryCreate.fromJson(Map<String, dynamic> json) => _$SubCategoryCreateFromJson(json);
   Map<String, dynamic> toJson() => _$SubCategoryCreateToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class SubCategoryUpdate {
   final String? name;
   final String? description;
-  @JsonKey(name: 'category_id')
   final int? categoryId;
-  @JsonKey(name: 'image_url')
   final String? imageUrl;
 
   const SubCategoryUpdate({this.name, this.description, this.categoryId, this.imageUrl});
@@ -175,4 +183,3 @@ class SubCategoryUpdate {
   factory SubCategoryUpdate.fromJson(Map<String, dynamic> json) => _$SubCategoryUpdateFromJson(json);
   Map<String, dynamic> toJson() => _$SubCategoryUpdateToJson(this);
 }
-
