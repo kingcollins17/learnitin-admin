@@ -14,6 +14,7 @@ CourseCategory _$CourseCategoryFromJson(Map<String, dynamic> json) =>
       createdAt: json['created_at'] == null
           ? null
           : DateTime.parse(json['created_at'] as String),
+      imageUrl: json['image_url'] as String?,
     );
 
 Map<String, dynamic> _$CourseCategoryToJson(CourseCategory instance) =>
@@ -22,6 +23,7 @@ Map<String, dynamic> _$CourseCategoryToJson(CourseCategory instance) =>
       'description': instance.description,
       'id': instance.id,
       'created_at': instance.createdAt?.toIso8601String(),
+      'image_url': instance.imageUrl,
     };
 
 CourseSubCategory _$CourseSubCategoryFromJson(Map<String, dynamic> json) =>
@@ -33,6 +35,7 @@ CourseSubCategory _$CourseSubCategoryFromJson(Map<String, dynamic> json) =>
       createdAt: json['created_at'] == null
           ? null
           : DateTime.parse(json['created_at'] as String),
+      imageUrl: json['image_url'] as String?,
     );
 
 Map<String, dynamic> _$CourseSubCategoryToJson(CourseSubCategory instance) =>
@@ -42,6 +45,7 @@ Map<String, dynamic> _$CourseSubCategoryToJson(CourseSubCategory instance) =>
       'category_id': instance.categoryId,
       'id': instance.id,
       'created_at': instance.createdAt?.toIso8601String(),
+      'image_url': instance.imageUrl,
     };
 
 ReviewSummary _$ReviewSummaryFromJson(Map<String, dynamic> json) =>
@@ -112,24 +116,28 @@ CategoryCreate _$CategoryCreateFromJson(Map<String, dynamic> json) =>
     CategoryCreate(
       name: json['name'] as String?,
       description: json['description'] as String?,
+      imageUrl: json['image_url'] as String?,
     );
 
 Map<String, dynamic> _$CategoryCreateToJson(CategoryCreate instance) =>
     <String, dynamic>{
       'name': instance.name,
       'description': instance.description,
+      'image_url': instance.imageUrl,
     };
 
 CategoryUpdate _$CategoryUpdateFromJson(Map<String, dynamic> json) =>
     CategoryUpdate(
       name: json['name'] as String?,
       description: json['description'] as String?,
+      imageUrl: json['image_url'] as String?,
     );
 
 Map<String, dynamic> _$CategoryUpdateToJson(CategoryUpdate instance) =>
     <String, dynamic>{
       'name': instance.name,
       'description': instance.description,
+      'image_url': instance.imageUrl,
     };
 
 SubCategoryCreate _$SubCategoryCreateFromJson(Map<String, dynamic> json) =>
@@ -137,6 +145,7 @@ SubCategoryCreate _$SubCategoryCreateFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String?,
       description: json['description'] as String?,
       categoryId: (json['category_id'] as num?)?.toInt(),
+      imageUrl: json['image_url'] as String?,
     );
 
 Map<String, dynamic> _$SubCategoryCreateToJson(SubCategoryCreate instance) =>
@@ -144,6 +153,7 @@ Map<String, dynamic> _$SubCategoryCreateToJson(SubCategoryCreate instance) =>
       'name': instance.name,
       'description': instance.description,
       'category_id': instance.categoryId,
+      'image_url': instance.imageUrl,
     };
 
 SubCategoryUpdate _$SubCategoryUpdateFromJson(Map<String, dynamic> json) =>
@@ -151,6 +161,7 @@ SubCategoryUpdate _$SubCategoryUpdateFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String?,
       description: json['description'] as String?,
       categoryId: (json['category_id'] as num?)?.toInt(),
+      imageUrl: json['image_url'] as String?,
     );
 
 Map<String, dynamic> _$SubCategoryUpdateToJson(SubCategoryUpdate instance) =>
@@ -158,4 +169,5 @@ Map<String, dynamic> _$SubCategoryUpdateToJson(SubCategoryUpdate instance) =>
       'name': instance.name,
       'description': instance.description,
       'category_id': instance.categoryId,
+      'image_url': instance.imageUrl,
     };

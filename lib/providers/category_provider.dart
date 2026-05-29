@@ -115,6 +115,7 @@ class CategoriesNotifier extends AsyncNotifier<List<CourseCategory>> {
                 id: category.id,
                 name: body.name ?? category.name,
                 description: body.description ?? category.description,
+                imageUrl: body.imageUrl ?? category.imageUrl,
                 createdAt: category.createdAt,
               );
             }
@@ -271,6 +272,7 @@ class SubCategoriesNotifier extends AsyncNotifier<List<CourseSubCategory>> {
                 name: body.name ?? subCategory.name,
                 description: body.description ?? subCategory.description,
                 categoryId: body.categoryId ?? subCategory.categoryId,
+                imageUrl: body.imageUrl ?? subCategory.imageUrl,
                 createdAt: subCategory.createdAt,
               );
             }

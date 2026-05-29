@@ -31,12 +31,14 @@ class _CategoriesPageState extends State<CategoriesPage> {
   CourseCategory? _editingCategory;
   String _categoryName = '';
   String _categoryDescription = '';
+  String _categoryImageUrl = '';
 
   // Form inputs for Subcategory Creation / Edit
   bool _showSubCategoryForm = false;
   CourseSubCategory? _editingSubCategory;
   String _subCategoryName = '';
   String _subCategoryDescription = '';
+  String _subCategoryImageUrl = '';
 
   @override
   void initState() {
@@ -64,6 +66,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
       _editingCategory = null;
       _categoryName = '';
       _categoryDescription = '';
+      _categoryImageUrl = '';
     });
   }
 
@@ -73,6 +76,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
       _editingCategory = category;
       _categoryName = category.name ?? '';
       _categoryDescription = category.description ?? '';
+      _categoryImageUrl = category.imageUrl ?? '';
     });
   }
 
@@ -96,21 +100,23 @@ class _CategoriesPageState extends State<CategoriesPage> {
         body: CategoryUpdate(
           name: _categoryName.trim(),
           description: _categoryDescription.trim().isNotEmpty ? _categoryDescription.trim() : null,
+          imageUrl: _categoryImageUrl.trim().isNotEmpty ? _categoryImageUrl.trim() : null,
         ),
         onSuccess: () {
           context.hideLoading();
           context.showSuccess('Category updated successfully');
-          _closeCategoryForm();
           if (_selectedCategory?.id == _editingCategory!.id) {
             setState(() {
               _selectedCategory = CourseCategory(
                 id: _editingCategory!.id,
                 name: _categoryName.trim(),
-                description: _categoryDescription.trim(),
+                description: _categoryDescription.trim().isNotEmpty ? _categoryDescription.trim() : null,
+                imageUrl: _categoryImageUrl.trim().isNotEmpty ? _categoryImageUrl.trim() : null,
                 createdAt: _selectedCategory?.createdAt,
               );
             });
           }
+          _closeCategoryForm();
         },
         onError: (msg, [st]) {
           context.hideLoading();
@@ -122,6 +128,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
         CategoryCreate(
           name: _categoryName.trim(),
           description: _categoryDescription.trim().isNotEmpty ? _categoryDescription.trim() : null,
+          imageUrl: _categoryImageUrl.trim().isNotEmpty ? _categoryImageUrl.trim() : null,
         ),
         onSuccess: () {
           context.hideLoading();
@@ -166,6 +173,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
       _editingSubCategory = null;
       _subCategoryName = '';
       _subCategoryDescription = '';
+      _subCategoryImageUrl = '';
     });
   }
 
@@ -176,6 +184,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
       _editingSubCategory = subCategory;
       _subCategoryName = subCategory.name ?? '';
       _subCategoryDescription = subCategory.description ?? '';
+      _subCategoryImageUrl = subCategory.imageUrl ?? '';
     });
   }
 
@@ -201,6 +210,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
           name: _subCategoryName.trim(),
           description: _subCategoryDescription.trim().isNotEmpty ? _subCategoryDescription.trim() : null,
           categoryId: _selectedCategory!.id,
+          imageUrl: _subCategoryImageUrl.trim().isNotEmpty ? _subCategoryImageUrl.trim() : null,
         ),
         onSuccess: () {
           context.hideLoading();
@@ -218,6 +228,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
           name: _subCategoryName.trim(),
           description: _subCategoryDescription.trim().isNotEmpty ? _subCategoryDescription.trim() : null,
           categoryId: _selectedCategory!.id,
+          imageUrl: _subCategoryImageUrl.trim().isNotEmpty ? _subCategoryImageUrl.trim() : null,
         ),
         onSuccess: () {
           context.hideLoading();
@@ -421,6 +432,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
           body: [
             _buildFormField('Category Name', 'e.g. Software Engineering', _categoryName, (val) => _categoryName = val),
             _buildFormField('Description', 'Describe this category...', _categoryDescription, (val) => _categoryDescription = val),
+            _buildFormField('Image URL', 'https://example.com/image.png', _categoryImageUrl, (val) => _categoryImageUrl = val),
           ],
         ),
 
@@ -438,6 +450,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
           body: [
             _buildFormField('Subcategory Name', 'e.g. Flutter & Dart', _subCategoryName, (val) => _subCategoryName = val),
             _buildFormField('Description', 'Describe this subcategory...', _subCategoryDescription, (val) => _subCategoryDescription = val),
+            _buildFormField('Image URL', 'https://example.com/image.png', _subCategoryImageUrl, (val) => _subCategoryImageUrl = val),
           ],
         ),
 
@@ -563,16 +576,21 @@ class _CategoryCard extends StatelessComponent {
   @override
   Component build(BuildContext context) {
     return div(
-      classes: 'bg-dark-card rounded-xl border border-dark-border/50 hover:border-primary/20 overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/5 flex flex-col',
+      classes: 'bg-dark-card rounded-xl border border-dark-border/50 hover:border-primary/20 overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/5 flex flex-col h-[170px]',
       [
         div(
-          classes: 'p-4 cursor-pointer flex-1 flex flex-col group',
+          classes: 'p-4 cursor-pointer h-full flex flex-col group',
           events: {
             'click': (e) => onTap(),
           },
           [
             // Title & Hover Actions row
-            div(classes: 'flex items-start justify-between gap-2 mb-2', [
+            div(classes: 'flex items-center justify-between gap-2 mb-2', [
+              if (category.imageUrl != null && category.imageUrl!.isNotEmpty)
+                img(
+                  src: category.imageUrl!,
+                  classes: 'w-8 h-8 rounded-lg object-cover shrink-0 border border-white/10 mr-1.5',
+                ),
               h4(classes: 'text-sm font-bold text-white group-hover:text-primary transition-colors truncate flex-1', [
                 Component.text(category.name ?? 'Unnamed Category'),
               ]),
@@ -600,13 +618,13 @@ class _CategoryCard extends StatelessComponent {
             ]),
 
             // Bottom row indicator
-            div(classes: 'flex items-center justify-between text-[11px] font-semibold text-dark-muted border-t border-white/5 pt-2.5 mt-auto', [
-              span(classes: 'group-hover:text-primary transition-colors', [
-                Component.text('View Subcategories'),
-              ]),
-              span(classes: 'group-hover:translate-x-1 transition-transform duration-200 text-primary', [
-                Component.text('→'),
-              ]),
+            div(classes: 'flex items-center justify-between border-t border-white/5 pt-2.5 mt-auto', [
+              button(
+                classes: 'px-2 py-0.5 bg-white/5 text-[9px] font-bold text-dark-muted rounded-md group-hover:text-primary group-hover:bg-primary/10 transition-all cursor-pointer',
+                [
+                  Component.text('View Subcategories'),
+                ],
+              ),
             ]),
           ],
         ),

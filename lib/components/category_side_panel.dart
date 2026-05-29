@@ -152,6 +152,11 @@ class CategorySidePanel extends StatelessComponent {
                     div(
                       classes: 'flex items-center justify-between gap-3 px-4 py-3 bg-white/5 rounded-xl hover:bg-white/[0.08] border border-white/5 transition-colors group',
                       [
+                        if (sub.imageUrl != null && sub.imageUrl!.isNotEmpty)
+                          img(
+                            src: sub.imageUrl!,
+                            classes: 'w-8 h-8 rounded-lg object-cover shrink-0 border border-white/10 mr-1.5',
+                          ),
                         div(classes: 'flex-1 min-w-0', [
                           p(classes: 'text-sm font-semibold text-white truncate', [
                             Component.text(sub.name ?? 'Unnamed'),
