@@ -2,6 +2,7 @@ import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 import 'package:jaspr_router/jaspr_router.dart';
 import 'package:jaspr_riverpod/jaspr_riverpod.dart';
+import '../providers/auth_provider.dart';
 import '../providers/user_provider.dart';
 
 class Sidebar extends StatelessComponent {
@@ -64,14 +65,43 @@ class Sidebar extends StatelessComponent {
       // Footer / Profile
       div(classes: 'pt-4 border-t border-dark-border px-2', [
         userAsync.when(
-          data: (user) => div(classes: 'flex items-center space-x-3', [
-            div(classes: 'w-10 h-10 rounded-full bg-dark-border flex items-center justify-center border border-white/10 overflow-hidden', [
-              .text(user?.fullName?.isNotEmpty == true ? user!.fullName!.substring(0, 1).toUpperCase() : 'A')
+          data: (user) => div(classes: 'flex items-center justify-between w-full', [
+            div(classes: 'flex items-center space-x-3', [
+              div(classes: 'w-10 h-10 rounded-full bg-dark-border flex items-center justify-center border border-white/10 overflow-hidden', [
+                .text(user?.fullName?.isNotEmpty == true ? user!.fullName!.substring(0, 1).toUpperCase() : 'A')
+              ]),
+              div([
+                p(classes: 'text-sm font-medium text-white', [.text(user?.fullName ?? user?.username ?? 'User')]),
+                p(classes: 'text-xs text-dark-muted', [.text(user?.isSuperuser == true ? 'Super Admin' : 'Admin')])
+              ])
             ]),
-            div([
-              p(classes: 'text-sm font-medium text-white', [.text(user?.fullName ?? user?.username ?? 'User')]),
-              p(classes: 'text-xs text-dark-muted', [.text(user?.isSuperuser == true ? 'Super Admin' : 'Admin')])
-            ])
+            button(
+              classes: 'p-2 rounded-lg text-dark-muted hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer border-none bg-transparent flex items-center justify-center outline-none',
+              onClick: () {
+                context.read(authProvider.notifier).logout();
+              },
+              [
+                svg(
+                  attributes: {
+                    'viewBox': '0 0 24 24',
+                    'fill': 'none',
+                    'stroke': 'currentColor',
+                    'stroke-width': '2',
+                    'stroke-linecap': 'round',
+                    'stroke-linejoin': 'round',
+                    'class': 'w-5 h-5',
+                  },
+                  [
+                    path(
+                      attributes: {
+                        'd': 'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9',
+                      },
+                      [],
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ]),
           loading: () => div(classes: 'flex items-center space-x-3 opacity-50', [
             div(classes: 'w-10 h-10 rounded-full bg-dark-border animate-pulse', []),

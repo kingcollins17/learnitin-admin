@@ -4,6 +4,7 @@ import 'package:jaspr_router/jaspr_router.dart';
 import 'package:jaspr_riverpod/jaspr_riverpod.dart';
 import '../core/config/environment_config.dart';
 import '../providers/api_provider.dart';
+import '../providers/auth_provider.dart';
 import '../providers/user_provider.dart';
 
 class Header extends StatelessComponent {
@@ -29,22 +30,32 @@ class Header extends StatelessComponent {
 
         // Right: Actions
         div(classes: 'flex items-center space-x-6', [
-          // Environment Toggle
-          div(classes: 'flex items-center space-x-2 bg-white/5 rounded-xl border border-dark-border/40 px-3 py-1.5', [
-            span(classes: 'text-xs text-dark-muted font-medium', [Component.text('Env:')]),
-            select(
-              classes: 'bg-transparent text-xs text-white focus:outline-none cursor-pointer font-semibold border-none pr-1',
-              onChange: (values) {
-                final envStr = values.firstOrNull ?? 'live';
-                final envVal = envStr == 'live' ? AppEnvironment.live : AppEnvironment.staging;
-                context.read(environmentProvider.notifier).state = envVal;
-              },
-              [
-                option(value: 'live', selected: env == AppEnvironment.live, [Component.text('Live')]),
-                option(value: 'staging', selected: env == AppEnvironment.staging, [Component.text('Staging')]),
-              ],
-            ),
-          ]),
+          // Environment Toggle Switch
+          div(
+            classes: 'flex items-center bg-black/30 border border-dark-border/60 rounded-full p-1 cursor-pointer select-none transition-all hover:border-dark-border',
+            events: {
+              'click': (e) {
+                final newEnv = env == AppEnvironment.live ? AppEnvironment.staging : AppEnvironment.live;
+                context.read(environmentProvider.notifier).state = newEnv;
+                context.read(authProvider.notifier).logout();
+                context.push('/login');
+              }
+            },
+            [
+              // Live Pill Background/Label
+              div(
+                classes: 'px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-all duration-300 '
+                    '${env == AppEnvironment.live ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.1)]' : 'text-dark-muted border border-transparent'}',
+                [Component.text('LIVE')],
+              ),
+              // Staging Pill Background/Label
+              div(
+                classes: 'px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-all duration-300 '
+                    '${env == AppEnvironment.staging ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.1)]' : 'text-dark-muted border border-transparent'}',
+                [Component.text('STAGING')],
+              ),
+            ],
+          ),
 
           // Search bar
           div(
