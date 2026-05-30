@@ -1,16 +1,25 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:jaspr/jaspr.dart';
 import 'package:jaspr_riverpod/jaspr_riverpod.dart';
+import 'package:jaspr_riverpod/legacy.dart';
 import 'package:learnitin_admin/core/config/environment_config.dart';
 import 'package:learnitin_admin/providers/local_storage_provider.dart';
 import 'package:learnitin_admin/services/api_service.dart';
 
+final environmentProvider = StateProvider<AppEnvironment>((ref) {
+  return kDebugMode ? AppEnvironment.staging : AppEnvironment.live;
+});
+
 final dioProvider = Provider<Dio>((ref) {
-  final config = enviroment;
+  final env = ref.watch(environmentProvider);
+  final baseUrl = env == AppEnvironment.live ? EnvironmentConfig.liveUrl : EnvironmentConfig.devUrl;
+  final fullApiUrl = '$baseUrl/api/v1';
+
   final localStorage = ref.watch(localStorageProvider);
   final dio = Dio(
     BaseOptions(
-      baseUrl: config.fullApiUrl,
+      baseUrl: fullApiUrl,
       connectTimeout: const Duration(seconds: 120),
       receiveTimeout: const Duration(seconds: 120),
       contentType: Headers.jsonContentType,

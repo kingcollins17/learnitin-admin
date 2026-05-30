@@ -27,6 +27,7 @@ class AppConfigsNotifier extends AsyncNotifier<List<AppConfig>> {
   FutureOr<List<AppConfig>> build() async {
     _page = 1;
     _hasMore = true;
+    ref.watch(apiServiceProvider);
     return _fetch();
   }
 

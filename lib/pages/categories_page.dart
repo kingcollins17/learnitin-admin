@@ -25,6 +25,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
   String _categorySearch = '';
   String _searchInputVal = '';
   Timer? _debounceTimer;
+  String _sortBy = 'default';
 
   // Form inputs for Category Creation / Edit
   bool _showCategoryForm = false;
@@ -32,6 +33,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
   String _categoryName = '';
   String _categoryDescription = '';
   String _categoryImageUrl = '';
+  String _categoryPopularityScore = '';
 
   // Form inputs for Subcategory Creation / Edit
   bool _showSubCategoryForm = false;
@@ -39,6 +41,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
   String _subCategoryName = '';
   String _subCategoryDescription = '';
   String _subCategoryImageUrl = '';
+  String _subCategoryPopularityScore = '';
 
   @override
   void initState() {
@@ -67,6 +70,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
       _categoryName = '';
       _categoryDescription = '';
       _categoryImageUrl = '';
+      _categoryPopularityScore = '';
     });
   }
 
@@ -77,6 +81,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
       _categoryName = category.name ?? '';
       _categoryDescription = category.description ?? '';
       _categoryImageUrl = category.imageUrl ?? '';
+      _categoryPopularityScore = category.popularityScore != null ? category.popularityScore.toString() : '';
     });
   }
 
@@ -93,6 +98,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
       return;
     }
 
+    final double? popularity = double.tryParse(_categoryPopularityScore.trim());
+
     context.showLoading();
     if (_editingCategory != null) {
       notifier.updateCategory(
@@ -101,6 +108,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
           name: _categoryName.trim(),
           description: _categoryDescription.trim().isNotEmpty ? _categoryDescription.trim() : null,
           imageUrl: _categoryImageUrl.trim().isNotEmpty ? _categoryImageUrl.trim() : null,
+          popularityScore: popularity,
         ),
         onSuccess: () {
           context.hideLoading();
@@ -113,6 +121,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                 description: _categoryDescription.trim().isNotEmpty ? _categoryDescription.trim() : null,
                 imageUrl: _categoryImageUrl.trim().isNotEmpty ? _categoryImageUrl.trim() : null,
                 createdAt: _selectedCategory?.createdAt,
+                popularityScore: popularity,
               );
             });
           }
@@ -129,6 +138,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
           name: _categoryName.trim(),
           description: _categoryDescription.trim().isNotEmpty ? _categoryDescription.trim() : null,
           imageUrl: _categoryImageUrl.trim().isNotEmpty ? _categoryImageUrl.trim() : null,
+          popularityScore: popularity,
         ),
         onSuccess: () {
           context.hideLoading();
@@ -174,6 +184,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
       _subCategoryName = '';
       _subCategoryDescription = '';
       _subCategoryImageUrl = '';
+      _subCategoryPopularityScore = '';
     });
   }
 
@@ -185,6 +196,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
       _subCategoryName = subCategory.name ?? '';
       _subCategoryDescription = subCategory.description ?? '';
       _subCategoryImageUrl = subCategory.imageUrl ?? '';
+      _subCategoryPopularityScore = subCategory.popularityScore != null ? subCategory.popularityScore.toString() : '';
     });
   }
 
@@ -202,6 +214,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
     }
     if (_selectedCategory == null) return;
 
+    final double? popularity = double.tryParse(_subCategoryPopularityScore.trim());
+
     context.showLoading();
     if (_editingSubCategory != null) {
       notifier.updateSubCategory(
@@ -211,6 +225,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
           description: _subCategoryDescription.trim().isNotEmpty ? _subCategoryDescription.trim() : null,
           categoryId: _selectedCategory!.id,
           imageUrl: _subCategoryImageUrl.trim().isNotEmpty ? _subCategoryImageUrl.trim() : null,
+          popularityScore: popularity,
         ),
         onSuccess: () {
           context.hideLoading();
@@ -229,6 +244,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
           description: _subCategoryDescription.trim().isNotEmpty ? _subCategoryDescription.trim() : null,
           categoryId: _selectedCategory!.id,
           imageUrl: _subCategoryImageUrl.trim().isNotEmpty ? _subCategoryImageUrl.trim() : null,
+          popularityScore: popularity,
         ),
         onSuccess: () {
           context.hideLoading();
@@ -407,6 +423,22 @@ class _CategoriesPageState extends State<CategoriesPage> {
               [Component.text('✕')],
             ),
         ]),
+        // Sort Dropdown
+        div(classes: 'flex items-center space-x-2 bg-white/5 rounded-xl border border-dark-border/40 px-3 py-2', [
+          span(classes: 'text-xs text-dark-muted font-medium', [Component.text('Sort by:')]),
+          select(
+            classes: 'bg-transparent text-xs text-white focus:outline-none cursor-pointer font-semibold border-none pr-2',
+            onChange: (values) {
+              setState(() {
+                _sortBy = values.firstOrNull ?? 'default';
+              });
+            },
+            [
+              option(value: 'default', selected: _sortBy == 'default', [Component.text('Default')]),
+              option(value: 'popularity', selected: _sortBy == 'popularity', [Component.text('Popularity (High to Low)')]),
+            ],
+          ),
+        ]),
         // Refresh
         button(
           classes: 'px-3.5 py-2 bg-white/5 rounded-xl text-sm font-medium text-dark-muted hover:text-white hover:bg-white/10 transition-all flex items-center space-x-2 cursor-pointer',
@@ -433,6 +465,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
             _buildFormField('Category Name', 'e.g. Software Engineering', _categoryName, (val) => _categoryName = val),
             _buildFormField('Description', 'Describe this category...', _categoryDescription, (val) => _categoryDescription = val),
             _buildFormField('Image URL', 'https://example.com/image.png', _categoryImageUrl, (val) => _categoryImageUrl = val),
+            _buildFormField('Popularity Score', 'e.g. 4.8', _categoryPopularityScore, (val) => _categoryPopularityScore = val),
           ],
         ),
 
@@ -451,6 +484,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
             _buildFormField('Subcategory Name', 'e.g. Flutter & Dart', _subCategoryName, (val) => _subCategoryName = val),
             _buildFormField('Description', 'Describe this subcategory...', _subCategoryDescription, (val) => _subCategoryDescription = val),
             _buildFormField('Image URL', 'https://example.com/image.png', _subCategoryImageUrl, (val) => _subCategoryImageUrl = val),
+            _buildFormField('Popularity Score', 'e.g. 4.5', _subCategoryPopularityScore, (val) => _subCategoryPopularityScore = val),
           ],
         ),
 
@@ -465,6 +499,10 @@ class _CategoriesPageState extends State<CategoriesPage> {
             return (c.name ?? '').toLowerCase().contains(term) ||
                 (c.description ?? '').toLowerCase().contains(term);
           }).toList();
+
+          if (_sortBy == 'popularity') {
+            filtered.sort((a, b) => (b.popularityScore ?? 0.0).compareTo(a.popularityScore ?? 0.0));
+          }
 
           if (filtered.isEmpty) {
             return div(
@@ -594,6 +632,11 @@ class _CategoryCard extends StatelessComponent {
               h4(classes: 'text-sm font-bold text-white group-hover:text-primary transition-colors truncate flex-1', [
                 Component.text(category.name ?? 'Unnamed Category'),
               ]),
+              if (category.popularityScore != null)
+                span(
+                  classes: 'px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold shrink-0 mr-1.5',
+                  [Component.text('🔥 ${category.popularityScore}')],
+                ),
               div(
                 classes: 'flex items-center space-x-1 shrink-0 md:opacity-0 group-hover:opacity-100 transition-opacity',
                 events: {'click': (e) => e.stopPropagation()},

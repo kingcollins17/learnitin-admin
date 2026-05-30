@@ -9,6 +9,7 @@ class CourseCategory {
   final int? id;
   final DateTime? createdAt;
   final String? imageUrl;
+  final double? popularityScore;
 
   const CourseCategory({
     this.name,
@@ -16,6 +17,7 @@ class CourseCategory {
     this.id,
     this.createdAt,
     this.imageUrl,
+    this.popularityScore,
   });
 
   factory CourseCategory.fromJson(Map<String, dynamic> json) => _$CourseCategoryFromJson(json);
@@ -30,6 +32,7 @@ class CourseSubCategory {
   final int? id;
   final DateTime? createdAt;
   final String? imageUrl;
+  final double? popularityScore;
 
   const CourseSubCategory({
     this.name,
@@ -38,6 +41,7 @@ class CourseSubCategory {
     this.id,
     this.createdAt,
     this.imageUrl,
+    this.popularityScore,
   });
 
   factory CourseSubCategory.fromJson(Map<String, dynamic> json) => _$CourseSubCategoryFromJson(json);
@@ -159,12 +163,14 @@ class SubCategoryCreate {
   final String? description;
   final int? categoryId;
   final String? imageUrl;
+  final double? popularityScore;
 
   const SubCategoryCreate({
     this.name,
     this.description,
     this.categoryId,
     this.imageUrl,
+    this.popularityScore,
   });
 
   factory SubCategoryCreate.fromJson(Map<String, dynamic> json) => _$SubCategoryCreateFromJson(json);
@@ -177,8 +183,15 @@ class SubCategoryUpdate {
   final String? description;
   final int? categoryId;
   final String? imageUrl;
+  final double? popularityScore;
 
-  const SubCategoryUpdate({this.name, this.description, this.categoryId, this.imageUrl});
+  const SubCategoryUpdate({
+    this.name,
+    this.description,
+    this.categoryId,
+    this.imageUrl,
+    this.popularityScore,
+  });
 
   factory SubCategoryUpdate.fromJson(Map<String, dynamic> json) => _$SubCategoryUpdateFromJson(json);
   Map<String, dynamic> toJson() => _$SubCategoryUpdateToJson(this);

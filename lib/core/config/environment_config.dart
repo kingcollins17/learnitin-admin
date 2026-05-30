@@ -1,5 +1,7 @@
 import 'package:jaspr/jaspr.dart';
 
+enum AppEnvironment { live, staging }
+
 class EnvironmentConfig {
   static final EnvironmentConfig _instance = EnvironmentConfig._internal(
     baseUrl: kDebugMode ? devUrl : liveUrl,

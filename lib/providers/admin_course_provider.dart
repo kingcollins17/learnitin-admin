@@ -47,6 +47,7 @@ class AdminCourseNotifier extends AsyncNotifier<PaginatedCourses?> {
 
   @override
   FutureOr<PaginatedCourses?> build() async {
+    ref.watch(apiServiceProvider);
     return _fetch();
   }
 

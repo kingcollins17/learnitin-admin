@@ -51,6 +51,7 @@ class AdminUserNotifier extends AsyncNotifier<PaginatedData<User>?> {
 
   @override
   FutureOr<PaginatedData<User>?> build() async {
+    ref.watch(apiServiceProvider);
     return _fetch();
   }
 
@@ -87,7 +88,7 @@ class AdminUserNotifier extends AsyncNotifier<PaginatedData<User>?> {
     // We only update what is passed. But if search is "", we might want to keep it as "".
     // If it's null, we don't know.
     // For this specific UI, I'll just allow passing null to represent "All".
-    
+
     _params = AdminUserParams(
       page: 1,
       perPage: _params.perPage,

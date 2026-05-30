@@ -23,6 +23,7 @@ class CategoriesNotifier extends AsyncNotifier<List<CourseCategory>> {
   FutureOr<List<CourseCategory>> build() async {
     _page = 1;
     _hasMore = true;
+    ref.watch(apiServiceProvider);
     return _fetch();
   }
 
@@ -117,6 +118,7 @@ class CategoriesNotifier extends AsyncNotifier<List<CourseCategory>> {
                 description: body.description ?? category.description,
                 imageUrl: body.imageUrl ?? category.imageUrl,
                 createdAt: category.createdAt,
+                popularityScore: body.popularityScore ?? category.popularityScore,
               );
             }
             return category;
@@ -274,6 +276,7 @@ class SubCategoriesNotifier extends AsyncNotifier<List<CourseSubCategory>> {
                 categoryId: body.categoryId ?? subCategory.categoryId,
                 imageUrl: body.imageUrl ?? subCategory.imageUrl,
                 createdAt: subCategory.createdAt,
+                popularityScore: body.popularityScore ?? subCategory.popularityScore,
               );
             }
             return subCategory;
@@ -314,6 +317,8 @@ class SubCategoriesNotifier extends AsyncNotifier<List<CourseSubCategory>> {
   }
 }
 
-final subCategoriesProvider = AsyncNotifierProvider.family<SubCategoriesNotifier, List<CourseSubCategory>, int>((categoryId) {
+final subCategoriesProvider = AsyncNotifierProvider.family<SubCategoriesNotifier, List<CourseSubCategory>, int>((
+  categoryId,
+) {
   return SubCategoriesNotifier(categoryId: categoryId);
 });

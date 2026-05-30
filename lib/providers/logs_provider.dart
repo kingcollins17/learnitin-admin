@@ -20,6 +20,7 @@ class LogsNotifier extends AsyncNotifier<List<LogEntry>> {
   FutureOr<List<LogEntry>> build() async {
     _page = 1;
     _hasMore = true;
+    ref.watch(apiServiceProvider);
     return _fetch();
   }
 

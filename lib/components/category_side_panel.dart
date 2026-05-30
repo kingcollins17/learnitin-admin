@@ -110,15 +110,20 @@ class CategorySidePanel extends StatelessComponent {
         // Content
         div(classes: 'flex-1 overflow-y-auto p-6 space-y-6', [
           // Category Info
-          if (category.description != null && category.description!.isNotEmpty)
-            div(classes: 'space-y-2', [
-              h5(classes: 'text-[10px] font-bold text-dark-muted uppercase tracking-wider', [
-                Component.text('About Category'),
-              ]),
-              div(classes: 'bg-white/5 rounded-xl border border-white/5 p-4', [
-                p(classes: 'text-sm text-white leading-relaxed', [Component.text(category.description!)]),
-              ]),
+          div(classes: 'space-y-2', [
+            h5(classes: 'text-[10px] font-bold text-dark-muted uppercase tracking-wider', [
+              Component.text('About Category'),
             ]),
+            div(classes: 'bg-white/5 rounded-xl border border-white/5 p-4 space-y-3', [
+              if (category.description != null && category.description!.isNotEmpty)
+                p(classes: 'text-sm text-white leading-relaxed', [Component.text(category.description!)]),
+              if (category.popularityScore != null)
+                div(classes: 'flex items-center space-x-1.5 text-xs font-semibold text-primary', [
+                  span([Component.text('🔥')]),
+                  span([Component.text('Popularity Score: ${category.popularityScore}')]),
+                ]),
+            ]),
+          ]),
 
           // Subcategories list
           div(classes: 'space-y-3', [
@@ -147,10 +152,14 @@ class CategorySidePanel extends StatelessComponent {
                   ]);
                 }
 
+                // Automatically sort subcategories descending by popularity score for consistency
+                final sortedSubCategories = List<CourseSubCategory>.from(subCategories)
+                  ..sort((a, b) => (b.popularityScore ?? 0.0).compareTo(a.popularityScore ?? 0.0));
+
                 return div(classes: 'space-y-2', [
-                  for (final sub in subCategories)
+                  for (final sub in sortedSubCategories)
                     div(
-                      classes: 'flex items-center justify-between gap-3 px-4 py-3 bg-white/5 rounded-xl hover:bg-white/[0.08] border border-white/5 transition-colors group',
+                       classes: 'flex items-center justify-between gap-3 px-4 py-3 bg-white/5 rounded-xl hover:bg-white/[0.08] border border-white/5 transition-colors group',
                       [
                         if (sub.imageUrl != null && sub.imageUrl!.isNotEmpty)
                           img(
@@ -158,8 +167,15 @@ class CategorySidePanel extends StatelessComponent {
                             classes: 'w-8 h-8 rounded-lg object-cover shrink-0 border border-white/10 mr-1.5',
                           ),
                         div(classes: 'flex-1 min-w-0', [
-                          p(classes: 'text-sm font-semibold text-white truncate', [
-                            Component.text(sub.name ?? 'Unnamed'),
+                          div(classes: 'flex items-center gap-2', [
+                            p(classes: 'text-sm font-semibold text-white truncate', [
+                              Component.text(sub.name ?? 'Unnamed'),
+                            ]),
+                            if (sub.popularityScore != null)
+                              span(
+                                classes: 'px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold shrink-0',
+                                [Component.text('🔥 ${sub.popularityScore}')],
+                              ),
                           ]),
                           if (sub.description != null && sub.description!.isNotEmpty)
                             p(classes: 'text-xs text-dark-muted truncate mt-0.5', [

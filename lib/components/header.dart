@@ -2,6 +2,8 @@ import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 import 'package:jaspr_router/jaspr_router.dart';
 import 'package:jaspr_riverpod/jaspr_riverpod.dart';
+import '../core/config/environment_config.dart';
+import '../providers/api_provider.dart';
 import '../providers/user_provider.dart';
 
 class Header extends StatelessComponent {
@@ -12,6 +14,7 @@ class Header extends StatelessComponent {
     var state = RouteState.of(context);
     var title = state.name;
     final userAsync = context.watch(currentUserProvider);
+    final env = context.watch(environmentProvider);
 
     return header(
       classes:
@@ -26,6 +29,23 @@ class Header extends StatelessComponent {
 
         // Right: Actions
         div(classes: 'flex items-center space-x-6', [
+          // Environment Toggle
+          div(classes: 'flex items-center space-x-2 bg-white/5 rounded-xl border border-dark-border/40 px-3 py-1.5', [
+            span(classes: 'text-xs text-dark-muted font-medium', [Component.text('Env:')]),
+            select(
+              classes: 'bg-transparent text-xs text-white focus:outline-none cursor-pointer font-semibold border-none pr-1',
+              onChange: (values) {
+                final envStr = values.firstOrNull ?? 'live';
+                final envVal = envStr == 'live' ? AppEnvironment.live : AppEnvironment.staging;
+                context.read(environmentProvider.notifier).state = envVal;
+              },
+              [
+                option(value: 'live', selected: env == AppEnvironment.live, [Component.text('Live')]),
+                option(value: 'staging', selected: env == AppEnvironment.staging, [Component.text('Staging')]),
+              ],
+            ),
+          ]),
+
           // Search bar
           div(
             classes: 'hidden md:flex items-center bg-dark-card border border-dark-border rounded-lg px-3 py-1.5 w-64',
