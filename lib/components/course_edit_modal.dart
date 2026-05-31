@@ -26,6 +26,7 @@ class _CourseEditModalState extends State<CourseEditModal> {
   late String _imageUrl;
   late String _duration;
   late double _popularityScore;
+  late int _totalEnrollees;
   int? _selectedCategoryId;
   int? _selectedSubCategoryId;
   bool _isLoading = false;
@@ -38,6 +39,7 @@ class _CourseEditModalState extends State<CourseEditModal> {
     _imageUrl = component.course.imageUrl ?? '';
     _duration = component.course.duration ?? '';
     _popularityScore = component.course.popularityScore ?? 0.0;
+    _totalEnrollees = component.course.totalEnrollees ?? 0;
     _selectedCategoryId = component.course.category?.id;
     _selectedSubCategoryId = component.course.subCategory?.id;
   }
@@ -60,6 +62,7 @@ class _CourseEditModalState extends State<CourseEditModal> {
       categoryId: _selectedCategoryId,
       subCategoryId: _selectedSubCategoryId,
       popularityScore: _popularityScore,
+      totalEnrollees: _totalEnrollees,
     );
 
     try {
@@ -93,42 +96,63 @@ class _CourseEditModalState extends State<CourseEditModal> {
         : null;
 
     return div(
-      classes:
-          'fixed inset-0 z-[100] flex items-center justify-center p-4 bg-dark-bg/60 backdrop-blur-md animate-in fade-in duration-200',
+      classes: 'space-y-6 pb-12 relative animate-in fade-in duration-300',
       [
-        // Backdrop click to close (when not loading)
-        div(
-          classes: 'absolute inset-0 cursor-default',
-          events: _isLoading ? {} : {'click': (e) => component.onClose()},
-          [],
-        ),
-
-        // Dialog Content Card
-        div(
-          classes:
-              'relative w-full max-w-xl bg-dark-card border border-dark-border/80 rounded-2xl shadow-2xl p-6 md:p-8 space-y-6 animate-in zoom-in-95 duration-200 overflow-y-auto max-h-[90vh] text-left',
-          [
-            // Header
-            div(classes: 'flex items-center justify-between border-b border-dark-border/30 pb-4', [
-              div(classes: 'space-y-1', [
-                h3(classes: 'text-lg font-bold text-white', [
-                  Component.text('Edit Course Details'),
-                ]),
-                p(classes: 'text-xs text-dark-muted', [
-                  Component.text('Modify attributes and classifications of this course.'),
-                ]),
-              ]),
-              if (!_isLoading)
-                button(
-                  classes:
-                      'p-2 text-dark-muted hover:text-white rounded-lg hover:bg-white/5 transition-all cursor-pointer',
-                  onClick: component.onClose,
-                  [Component.text('✕')],
-                ),
+        // Top Navigation / Breadcrumbs & Actions Header
+        div(classes: 'flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-dark-border/30 pb-6', [
+          div(classes: 'space-y-1', [
+            div(classes: 'flex items-center space-x-2 text-xs text-dark-muted', [
+              button(
+                classes: 'hover:text-white transition-colors cursor-pointer',
+                onClick: component.onClose,
+                [Component.text('Courses')],
+              ),
+              span([Component.text('/')]),
+              span(classes: 'text-white font-medium', [Component.text('Course Editor')]),
+              span([Component.text('/')]),
+              span(classes: 'text-primary font-semibold', [Component.text(component.course.title ?? 'Edit Course')]),
             ]),
+            h1(classes: 'text-3xl font-extrabold text-white tracking-tight mt-1', [
+              Component.text('Edit Course Details'),
+            ]),
+            p(classes: 'text-xs text-dark-muted mt-1', [
+              Component.text('Modify attributes, taxonomies, and performance scores for this course.'),
+            ]),
+          ]),
+          div(classes: 'flex items-center gap-3 shrink-0', [
+            if (!_isLoading)
+              button(
+                classes:
+                    'px-5 py-2.5 bg-white/5 border border-dark-border rounded-xl text-sm font-semibold text-white hover:bg-white/10 transition-all cursor-pointer hover:border-white/20',
+                onClick: component.onClose,
+                [Component.text('Cancel')],
+              ),
+            button(
+              classes:
+                  'px-6 py-2.5 btn-primary rounded-xl text-sm font-bold shadow-lg shadow-primary/20 flex items-center space-x-2 cursor-pointer transition-all active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed',
+              attributes: (_title.trim().isEmpty || _isLoading) ? {'disabled': ''} : {},
+              onClick: _isLoading ? null : _submit,
+              [
+                if (_isLoading)
+                  div(
+                    classes: 'w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1.5',
+                    [],
+                  ),
+                span([Component.text('Save Changes')]),
+              ],
+            ),
+          ]),
+        ]),
 
-            // Form
-            div(classes: 'space-y-4', [
+        // Main Two-Column Layout
+        div(classes: 'grid grid-cols-1 lg:grid-cols-12 gap-8 text-left', [
+          // ── LEFT COLUMN (lg:col-span-8) - Main Content ──────────────
+          div(classes: 'lg:col-span-8 space-y-6', [
+            div(classes: 'card p-6 space-y-4 bg-dark-card border border-dark-border rounded-2xl shadow-xl', [
+              h3(classes: 'text-sm font-bold text-white uppercase tracking-wider border-b border-dark-border/30 pb-2.5', [
+                Component.text('Course Information'),
+              ]),
+              
               // Title Input
               div(classes: 'space-y-1.5', [
                 label(classes: 'text-xs font-bold text-dark-muted uppercase tracking-wider', [
@@ -151,7 +175,7 @@ class _CourseEditModalState extends State<CourseEditModal> {
                 ]),
                 textarea(
                   classes:
-                      'bg-dark-border/20 border border-dark-border rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all w-full min-h-[100px]',
+                      'bg-dark-border/20 border border-dark-border rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all w-full min-h-[150px] max-h-[300px]',
                   onInput: (val) => setState(() => _description = val),
                   attributes: _isLoading ? {'disabled': ''} : {},
                   [Component.text(_description)],
@@ -172,60 +196,31 @@ class _CourseEditModalState extends State<CourseEditModal> {
                   attributes: _isLoading ? {'disabled': ''} : {},
                 ),
               ]),
+            ]),
+          ]),
 
-              // Duration & Popularity Grid
-              div(classes: 'grid grid-cols-1 sm:grid-cols-2 gap-4', [
-                // Duration
-                div(classes: 'space-y-1.5', [
-                  label(classes: 'text-xs font-bold text-dark-muted uppercase tracking-wider', [
-                    Component.text('Duration'),
-                  ]),
-                  input<String>(
-                    type: InputType.text,
-                    classes:
-                        'bg-dark-border/20 border border-dark-border rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all w-full',
-                    value: _duration,
-                    onInput: (val) => setState(() => _duration = val),
-                    attributes: _isLoading ? {'disabled': ''} : {},
-                  ),
-                ]),
-
-                // Popularity Score
-                div(classes: 'space-y-1.5', [
-                  label(classes: 'text-xs font-bold text-dark-muted uppercase tracking-wider', [
-                    Component.text('Popularity Score'),
-                  ]),
-                  input<num>(
-                    type: InputType.number,
-                    classes:
-                        'bg-dark-border/20 border border-dark-border rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all w-full',
-                    value: _popularityScore.toString(),
-                    onInput: (val) => setState(() => _popularityScore = val.toDouble()),
-                    attributes: {
-                      'step': '0.1',
-                      'min': '0',
-                      if (_isLoading) 'disabled': '',
-                    },
-                  ),
-                ]),
+          // ── RIGHT COLUMN (lg:col-span-4) - Sidebar Metadata ──────────
+          div(classes: 'lg:col-span-4 space-y-6', [
+            // Taxonomy & Placement
+            div(classes: 'bg-dark-card border border-dark-border rounded-2xl p-5 space-y-4 shadow-xl', [
+              h3(classes: 'text-sm font-bold text-white uppercase tracking-wider border-b border-dark-border/30 pb-2.5', [
+                Component.text('Taxonomy & Settings'),
               ]),
-
-              // Category & Subcategory Grid
-              div(classes: 'grid grid-cols-1 sm:grid-cols-2 gap-4', [
+              div(classes: 'space-y-4', [
                 // Category select
                 div(classes: 'space-y-1.5', [
-                  label(classes: 'text-xs font-semibold text-dark-muted', [
+                  label(classes: 'text-xs font-semibold text-dark-muted pl-0.5', [
                     Component.text('Category'),
                   ]),
                   categoriesAsync.when(
                     data: (categories) => select(
                       classes:
-                          'bg-dark-border/20 border border-dark-border rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all w-full cursor-pointer',
+                          'bg-dark-bg/40 border border-white/10 rounded-xl px-3.5 py-3 text-xs text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all w-full cursor-pointer hover:border-white/20',
                       onChange: (values) {
                         final val = values.firstOrNull ?? 'null';
                         setState(() {
                           _selectedCategoryId = val == 'null' ? null : int.tryParse(val);
-                          _selectedSubCategoryId = null; // Reset subcategory when category changes
+                          _selectedSubCategoryId = null;
                         });
                       },
                       [
@@ -240,7 +235,7 @@ class _CourseEditModalState extends State<CourseEditModal> {
                     ),
                     loading: () => div(
                       classes:
-                          'bg-white/5 border border-white/10 rounded-xl px-3 py-3 text-sm text-dark-muted animate-pulse',
+                          'bg-white/5 border border-white/10 rounded-xl px-3.5 py-3 text-xs text-dark-muted animate-pulse',
                       [
                         Component.text('Loading categories...'),
                       ],
@@ -253,13 +248,13 @@ class _CourseEditModalState extends State<CourseEditModal> {
 
                 // Subcategory select
                 div(classes: 'space-y-1.5', [
-                  label(classes: 'text-xs font-semibold text-dark-muted', [
+                  label(classes: 'text-xs font-semibold text-dark-muted pl-0.5', [
                     Component.text('Subcategory'),
                   ]),
                   if (_selectedCategoryId == null)
                     select(
                       classes:
-                          'bg-dark-border/20 border border-dark-border/40 rounded-xl px-3 py-3 text-sm text-dark-muted/40 w-full cursor-not-allowed',
+                          'bg-dark-bg/25 border border-white/5 rounded-xl px-3.5 py-3 text-xs text-dark-muted/40 w-full cursor-not-allowed',
                       attributes: {'disabled': ''},
                       [
                         option(value: 'null', [Component.text('Select category first')]),
@@ -269,7 +264,7 @@ class _CourseEditModalState extends State<CourseEditModal> {
                     subCategoriesAsync.when(
                       data: (subCategories) => select(
                         classes:
-                            'bg-dark-border/20 border border-dark-border rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all w-full cursor-pointer',
+                            'bg-dark-bg/40 border border-white/10 rounded-xl px-3.5 py-3 text-xs text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all w-full cursor-pointer hover:border-white/20',
                         onChange: (values) {
                           final val = values.firstOrNull ?? 'null';
                           setState(() {
@@ -288,7 +283,7 @@ class _CourseEditModalState extends State<CourseEditModal> {
                       ),
                       loading: () => div(
                         classes:
-                            'bg-white/5 border border-white/10 rounded-xl px-3 py-3 text-sm text-dark-muted animate-pulse',
+                            'bg-white/5 border border-white/10 rounded-xl px-3.5 py-3 text-xs text-dark-muted animate-pulse',
                         [
                           Component.text('Loading subcategories...'),
                         ],
@@ -301,32 +296,67 @@ class _CourseEditModalState extends State<CourseEditModal> {
               ]),
             ]),
 
-            // Footer Actions
-            div(classes: 'flex items-center justify-end gap-3 pt-4 border-t border-dark-border/30', [
-              if (!_isLoading)
-                button(
-                  classes:
-                      'px-6 py-2.5 bg-white/5 border border-dark-border rounded-xl text-sm font-semibold text-white hover:bg-white/10 transition-all cursor-pointer',
-                  onClick: component.onClose,
-                  [Component.text('Cancel')],
-                ),
-              button(
-                classes:
-                    'px-6 py-2.5 btn-primary rounded-xl text-sm font-bold shadow-lg shadow-primary/20 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer',
-                attributes: (_title.trim().isEmpty || _isLoading) ? {'disabled': ''} : {},
-                onClick: _isLoading ? null : _submit,
-                [
-                  if (_isLoading)
-                    div(
-                      classes: 'w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1.5',
-                      [],
-                    ),
-                  span([Component.text('Save Changes')]),
-                ],
-              ),
+            // Attributes and Metrics
+            div(classes: 'bg-dark-card border border-dark-border rounded-2xl p-5 space-y-4 shadow-xl', [
+              h3(classes: 'text-sm font-bold text-white uppercase tracking-wider border-b border-dark-border/30 pb-2.5', [
+                Component.text('Course Metrics'),
+              ]),
+              div(classes: 'space-y-4', [
+                // Duration
+                div(classes: 'space-y-1.5', [
+                  label(classes: 'text-xs font-bold text-dark-muted uppercase tracking-wider pl-0.5', [
+                    Component.text('Duration'),
+                  ]),
+                  input<String>(
+                    type: InputType.text,
+                    classes:
+                        'bg-dark-bg/40 border border-white/10 rounded-xl px-3.5 py-3 text-xs text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all w-full',
+                    value: _duration,
+                    onInput: (val) => setState(() => _duration = val),
+                    attributes: _isLoading ? {'disabled': ''} : {},
+                  ),
+                ]),
+
+                // Popularity Score
+                div(classes: 'space-y-1.5', [
+                  label(classes: 'text-xs font-bold text-dark-muted uppercase tracking-wider pl-0.5', [
+                    Component.text('Popularity Score'),
+                  ]),
+                  input<num>(
+                    type: InputType.number,
+                    classes:
+                        'bg-dark-bg/40 border border-white/10 rounded-xl px-3.5 py-3 text-xs text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all w-full',
+                    value: _popularityScore.toString(),
+                    onInput: (val) => setState(() => _popularityScore = val.toDouble()),
+                    attributes: {
+                      'step': '0.1',
+                      'min': '0',
+                      if (_isLoading) 'disabled': '',
+                    },
+                  ),
+                ]),
+
+                // Total Enrollees
+                div(classes: 'space-y-1.5', [
+                  label(classes: 'text-xs font-bold text-dark-muted uppercase tracking-wider pl-0.5', [
+                    Component.text('Total Enrollees'),
+                  ]),
+                  input<num>(
+                    type: InputType.number,
+                    classes:
+                        'bg-dark-bg/40 border border-white/10 rounded-xl px-3.5 py-3 text-xs text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all w-full',
+                    value: _totalEnrollees.toString(),
+                    onInput: (val) => setState(() => _totalEnrollees = val.toInt()),
+                    attributes: {
+                      'min': '0',
+                      if (_isLoading) 'disabled': '',
+                    },
+                  ),
+                ]),
+              ]),
             ]),
-          ],
-        ),
+          ]),
+        ]),
       ],
     );
   }

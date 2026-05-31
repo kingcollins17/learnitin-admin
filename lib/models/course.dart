@@ -113,6 +113,7 @@ class CourseUpdate {
   final String? title, description, imageUrl, duration;
   final int? categoryId, subCategoryId;
   final double? popularityScore;
+  final int? totalEnrollees;
 
   CourseUpdate({
     this.title,
@@ -122,6 +123,7 @@ class CourseUpdate {
     this.categoryId,
     this.subCategoryId,
     this.popularityScore,
+    this.totalEnrollees,
   });
   factory CourseUpdate.fromJson(Map<String, dynamic> json) => _$CourseUpdateFromJson(json);
   Map<String, dynamic> toJson() => _$CourseUpdateToJson(this);

@@ -32,7 +32,9 @@ class AuthNotifier extends AsyncNotifier<String?> {
         username: email,
         password: password,
       );
-
+      if (response.accessToken == null) {
+        throw Exception(response.detail ?? 'Something went wrong');
+      }
       // Store token in local storage using the reference
       _localStorage?.save(
         accessToken: response.accessToken,

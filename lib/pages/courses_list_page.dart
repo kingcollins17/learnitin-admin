@@ -47,6 +47,13 @@ class _CoursesListPageState extends State<CoursesListPage> {
   Component build(BuildContext context) {
     final editingCourse = context.watch(editingCourseProvider);
 
+    if (editingCourse != null) {
+      return CourseEditModal(
+        course: editingCourse,
+        onClose: () => context.read(editingCourseProvider.notifier).state = null,
+      );
+    }
+
     return div(classes: 'space-y-8 pb-8 relative', [
       // ── Page Header ──────────────────────────────────────────────
       div(classes: 'flex flex-col md:flex-row md:items-center justify-between gap-4', [
@@ -77,13 +84,6 @@ class _CoursesListPageState extends State<CoursesListPage> {
         CourseCreateOutlineModal(
           onClose: _closeCreateModal,
           onOutlineGenerated: _onOutlineGenerated,
-        ),
-
-      // ── Edit Course Modal ──────────────────────────────────────────
-      if (editingCourse != null)
-        CourseEditModal(
-          course: editingCourse,
-          onClose: () => context.read(editingCourseProvider.notifier).state = null,
         ),
     ]);
   }

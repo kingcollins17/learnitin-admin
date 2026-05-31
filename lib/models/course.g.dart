@@ -126,6 +126,7 @@ CourseUpdate _$CourseUpdateFromJson(Map<String, dynamic> json) => CourseUpdate(
   categoryId: (json['category_id'] as num?)?.toInt(),
   subCategoryId: (json['sub_category_id'] as num?)?.toInt(),
   popularityScore: (json['popularity_score'] as num?)?.toDouble(),
+  totalEnrollees: (json['total_enrollees'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$CourseUpdateToJson(CourseUpdate instance) =>
@@ -137,6 +138,7 @@ Map<String, dynamic> _$CourseUpdateToJson(CourseUpdate instance) =>
       'category_id': instance.categoryId,
       'sub_category_id': instance.subCategoryId,
       'popularity_score': instance.popularityScore,
+      'total_enrollees': instance.totalEnrollees,
     };
 
 CategoryCreate _$CategoryCreateFromJson(Map<String, dynamic> json) =>
