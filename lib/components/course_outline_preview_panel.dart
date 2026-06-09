@@ -34,7 +34,7 @@ class _CourseOutlinePreviewPanelState extends State<CourseOutlinePreviewPanel> {
 
     try {
       await context
-          .read(adminCourseProvider.notifier)
+          .read(adminCourseProvider(defaultAdminCourseParams).notifier)
           .createCourse(
             body: component.outline,
             categoryId: _selectedCategoryId,
@@ -60,7 +60,7 @@ class _CourseOutlinePreviewPanelState extends State<CourseOutlinePreviewPanel> {
   @override
   Component build(BuildContext context) {
     // Watch categories state
-    final categoriesAsync = context.watch(categoriesProvider(null));
+    final categoriesAsync = context.watch(categoriesProvider((search: null, sortByPopularity: null)));
 
     // Watch subcategories state
     final subCategoriesAsync = _selectedCategoryId != null

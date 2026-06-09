@@ -49,7 +49,7 @@ class _CourseCreateOutlineModalState extends State<CourseCreateOutlineModal> {
 
     try {
       final response = await context
-          .read(adminCourseProvider.notifier)
+          .read(adminCourseProvider(defaultAdminCourseParams).notifier)
           .generateCourseOutline(
             request,
             onError: (msg, [st]) {

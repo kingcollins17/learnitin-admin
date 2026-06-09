@@ -60,7 +60,6 @@ extension ErrorSanitizer on Object? {
         return 'Secure connection failed. Please contact support if this persists.';
 
       case DioExceptionType.unknown:
-      default:
         if (error.message?.contains('SocketException') ?? false) {
           return 'No internet connection detected.';
         }

@@ -1,11 +1,9 @@
 import 'package:learnitin_admin/core/utils/browser_utils.dart';
 import 'dart:async';
-import 'dart:js_interop';
 import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 import 'package:jaspr_riverpod/jaspr_riverpod.dart';
 import 'package:jaspr_router/jaspr_router.dart';
-import 'package:learnitin_admin/core/utils/context_extensions.dart';
 
 import '../providers/admin_user_provider.dart';
 import '../models/paginated_response.dart';
@@ -14,7 +12,6 @@ import '../providers/auth_provider.dart';
 import '../providers/notification_provider.dart';
 import '../providers/api_provider.dart';
 import '../core/utils/error_sanitizer.dart';
-import '../providers/user_detail_provider.dart';
 import '../components/user_side_panel.dart';
 
 class UsersListPage extends StatefulComponent {

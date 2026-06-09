@@ -330,8 +330,11 @@ class _ApiService implements ApiService {
     int? perPage,
     bool? isPublic,
     String? level,
+    String? search,
     int? minEnrollees,
     bool? sortByPopularity,
+    int? categoryId,
+    int? subCategoryId,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
@@ -339,8 +342,11 @@ class _ApiService implements ApiService {
       r'per_page': perPage,
       r'is_public': isPublic,
       r'level': level,
+      r'search': search,
       r'min_enrollees': minEnrollees,
       r'sort_by_popularity': sortByPopularity,
+      r'category_id': categoryId,
+      r'sub_category_id': subCategoryId,
     };
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
@@ -890,15 +896,17 @@ class _ApiService implements ApiService {
 
   @override
   Future<GenericApiResponse<List<CourseCategory>>> getCategories({
-    int? page,
-    int? perPage,
+    int? page = 1,
+    int? perPage = 200,
     String? search,
+    bool? sortByPopularity = false,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'page': page,
       r'per_page': perPage,
       r'search': search,
+      r'sort_by_popularity': sortByPopularity,
     };
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};

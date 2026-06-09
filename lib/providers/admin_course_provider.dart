@@ -40,7 +40,41 @@ class AdminCourseParams {
   }
 }
 
+typedef AdminCourseRecord = ({
+  bool? sortByPopularity,
+  int? minEnrollees,
+  String? search,
+  String? level,
+  int? categoryId,
+  int? subCategoryId,
+});
+
+const AdminCourseRecord defaultAdminCourseParams = (
+  sortByPopularity: true,
+  minEnrollees: null,
+  search: null,
+  level: null,
+  categoryId: null,
+  subCategoryId: null,
+);
+
 class AdminCourseNotifier extends AsyncNotifier<PaginatedCourses?> {
+  final bool? sortByPopularity;
+  final int? minEnrollees;
+  final String? search;
+  final String? level;
+  final int? categoryId;
+  final int? subCategoryId;
+
+  AdminCourseNotifier.withFilters({
+    this.sortByPopularity,
+    this.minEnrollees,
+    this.search,
+    this.level,
+    this.categoryId,
+    this.subCategoryId,
+  });
+
   AdminCourseParams _params = const AdminCourseParams();
 
   AdminCourseParams get params => _params;
@@ -57,6 +91,13 @@ class AdminCourseNotifier extends AsyncNotifier<PaginatedCourses?> {
       final response = await api.getCourses(
         page: _params.page,
         perPage: _params.perPage,
+        sortByPopularity: sortByPopularity,
+        minEnrollees: minEnrollees,
+        search: (search?.isNotEmpty == true) ? search : null,
+        level: (level?.isNotEmpty == true) ? level : null,
+        categoryId: categoryId,
+        subCategoryId: subCategoryId,
+        isPublic: null,
       );
       return response.data;
     } catch (e) {
@@ -67,12 +108,6 @@ class AdminCourseNotifier extends AsyncNotifier<PaginatedCourses?> {
 
   Future<void> setPage(int page) async {
     _params = _params.copyWith(page: page);
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _fetch());
-  }
-
-  Future<void> setSearch(String? search) async {
-    _params = _params.copyWith(page: 1, search: () => (search?.isEmpty == true ? null : search));
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() => _fetch());
   }
@@ -173,8 +208,19 @@ class AdminCourseNotifier extends AsyncNotifier<PaginatedCourses?> {
   }
 }
 
-final adminCourseProvider = AsyncNotifierProvider<AdminCourseNotifier, PaginatedCourses?>(() {
-  return AdminCourseNotifier();
+final adminCourseProvider = AsyncNotifierProvider.family<
+    AdminCourseNotifier,
+    PaginatedCourses?,
+    AdminCourseRecord
+>((arg) {
+  return AdminCourseNotifier.withFilters(
+    sortByPopularity: arg.sortByPopularity,
+    minEnrollees: arg.minEnrollees,
+    search: arg.search,
+    level: arg.level,
+    categoryId: arg.categoryId,
+    subCategoryId: arg.subCategoryId,
+  );
 });
 
 final selectedGeneratedCourseProvider = StateProvider<GeneratedCourse?>((ref) => null);

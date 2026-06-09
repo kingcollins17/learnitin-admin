@@ -68,11 +68,11 @@ class Sidebar extends StatelessComponent {
           data: (user) => div(classes: 'flex items-center justify-between w-full', [
             div(classes: 'flex items-center space-x-3', [
               div(classes: 'w-10 h-10 rounded-full bg-dark-border flex items-center justify-center border border-white/10 overflow-hidden', [
-                .text(user?.fullName?.isNotEmpty == true ? user!.fullName!.substring(0, 1).toUpperCase() : 'A')
+                .text(user.fullName?.isNotEmpty == true ? user.fullName!.substring(0, 1).toUpperCase() : 'A')
               ]),
               div([
-                p(classes: 'text-sm font-medium text-white', [.text(user?.fullName ?? user?.username ?? 'User')]),
-                p(classes: 'text-xs text-dark-muted', [.text(user?.isSuperuser == true ? 'Super Admin' : 'Admin')])
+                p(classes: 'text-sm font-medium text-white', [.text(user.fullName ?? user.username ?? 'User')]),
+                p(classes: 'text-xs text-dark-muted', [.text(user.isSuperuser == true ? 'Super Admin' : 'Admin')])
               ])
             ]),
             button(

@@ -57,6 +57,12 @@ class PaginatedCourses {
   factory PaginatedCourses.fromJson(Map<String, dynamic> json) => _$PaginatedCoursesFromJson(json);
   Map<String, dynamic> toJson() => _$PaginatedCoursesToJson(this);
 
-  int get totalPages => (total / perPage).ceil();
+  int get totalPages {
+    if (items.length < perPage) {
+      return page;
+    } else {
+      return page + 1;
+    }
+  }
 }
 

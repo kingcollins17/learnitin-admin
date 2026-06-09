@@ -154,7 +154,7 @@ class CategorySidePanel extends StatelessComponent {
 
                 // Automatically sort subcategories descending by popularity score for consistency
                 final sortedSubCategories = List<CourseSubCategory>.from(subCategories)
-                  ..sort((a, b) => (b.popularityScore ?? 0.0).compareTo(a.popularityScore ?? 0.0));
+                  ..sort((s1, s2) => (s2.popularityScore ?? 0.0).compareTo(s1.popularityScore ?? 0.0));
 
                 return div(classes: 'space-y-2', [
                   for (final sub in sortedSubCategories)

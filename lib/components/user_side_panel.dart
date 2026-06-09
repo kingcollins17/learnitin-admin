@@ -1,5 +1,4 @@
 import 'package:learnitin_admin/core/utils/browser_utils.dart';
-import 'dart:js_interop';
 import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 import 'package:jaspr_riverpod/jaspr_riverpod.dart';
@@ -139,10 +138,8 @@ class UserSidePanel extends StatelessComponent {
                   div(classes: 'grid grid-cols-2 gap-3', [
                     button(
                       classes:
-                          'px-4 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center ' +
-                          (user.subscription?.status == "active" && user.subscription?.productId != "free"
-                              ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20'
-                              : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20'),
+                          'px-4 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center '
+                          '${user.subscription?.status == "active" && user.subscription?.productId != "free" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20"}',
                       onClick: () {
                         final notifier = context.read(userDetailProvider(userId).notifier);
                         if (user.subscription?.status == "active" && user.subscription?.productId != "free") {
@@ -167,10 +164,8 @@ class UserSidePanel extends StatelessComponent {
                     ),
                     button(
                       classes:
-                          'px-4 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center ' +
-                          (user.isActive == true
-                              ? 'bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20'
-                              : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20'),
+                          'px-4 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center '
+                          '${user.isActive == true ? "bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20"}',
                       onClick: () {
                         final notifier = context.read(userDetailProvider(userId).notifier);
                         if (user.isActive == true) {

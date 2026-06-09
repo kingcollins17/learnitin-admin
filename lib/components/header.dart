@@ -82,7 +82,10 @@ class Header extends StatelessComponent {
                 'w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary border border-primary/20 cursor-pointer overflow-hidden',
             [
               userAsync.when(
-                data: (user) => Component.text(user?.fullName?.isNotEmpty == true ? user!.fullName!.substring(0, 1).toUpperCase() : 'A'),
+                data: (user) {
+                  final name = user.fullName;
+                  return Component.text(name != null && name.isNotEmpty ? name[0].toUpperCase() : 'A');
+                },
                 loading: () => div(classes: 'w-full h-full bg-primary/10 animate-pulse', []),
                 error: (e, st) => Component.text('?'),
               )

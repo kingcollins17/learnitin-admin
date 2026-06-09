@@ -71,11 +71,11 @@ class _HomeState extends State<Home> {
       userAsync.when(
         data: (user) => statsAsync.when(
           data: (stats) => _WelcomeBanner(
-            userName: user?.fullName ?? user?.username ?? 'Admin',
+            userName: user.fullName ?? user.username ?? 'Admin',
             activeNow: stats?.activeUsers ?? 0,
           ),
-          loading: () => _WelcomeBanner(userName: user?.fullName ?? 'Admin', activeNow: 0),
-          error: (e, st) => _WelcomeBanner(userName: user?.fullName ?? 'Admin', activeNow: 0),
+          loading: () => _WelcomeBanner(userName: user.fullName ?? 'Admin', activeNow: 0),
+          error: (e, st) => _WelcomeBanner(userName: user.fullName ?? 'Admin', activeNow: 0),
         ),
         loading: () => _WelcomeBanner(userName: 'Admin', activeNow: 0),
         error: (e, st) => _WelcomeBanner(userName: 'Admin', activeNow: 0),
@@ -416,18 +416,10 @@ class _UsersSectionState extends State<_UsersSection> {
     super.dispose();
   }
 
-  void _onSearchChanged(String query, AdminUserNotifier notifier) {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 500), () {
-      notifier.setSearch(query);
-    });
-  }
-
   @override
   Component build(BuildContext context) {
     final usersAsync = context.watch(adminUserProvider);
     final notifier = context.read(adminUserProvider.notifier);
-    final params = notifier.params;
 
     return div(classes: 'card overflow-hidden', [
       // Header
@@ -673,7 +665,7 @@ class _TopCoursesSection extends StatelessComponent {
 
   @override
   Component build(BuildContext context) {
-    final coursesAsync = context.watch(adminCourseProvider);
+    final coursesAsync = context.watch(adminCourseProvider(defaultAdminCourseParams));
 
     return div(classes: 'card', [
       div(classes: 'flex items-center justify-between mb-6', [
@@ -699,7 +691,7 @@ class _TopCoursesSection extends StatelessComponent {
           }
           // Take top 5 courses by enrollment for the dashboard widget
           final topCourses = List<Course>.from(courses)
-            ..sort((a, b) => (b.totalEnrollees ?? 0).compareTo(a.totalEnrollees ?? 0));
+            ..sort((c1, c2) => (c2.totalEnrollees ?? 0).compareTo(c1.totalEnrollees ?? 0));
           final displayCourses = topCourses.take(5).toList();
 
           return div(classes: 'space-y-3', [

@@ -25,7 +25,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
   String _categorySearch = '';
   String _searchInputVal = '';
   Timer? _debounceTimer;
-  String _sortBy = 'default';
+  bool _sortByPopularity = false;
 
   // Form inputs for Category Creation / Edit
   bool _showCategoryForm = false;
@@ -356,8 +356,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
       ]);
     }
 
-    final categoriesAsync = context.watch(categoriesProvider(_categorySearch));
-    final categoriesNotifier = context.read(categoriesProvider(_categorySearch).notifier);
+    final params = (search: _categorySearch, sortByPopularity: _sortByPopularity);
+    final categoriesAsync = context.watch(categoriesProvider(params));
+    final categoriesNotifier = context.read(categoriesProvider(params).notifier);
 
     return div(classes: 'space-y-6 pb-8', [
       // ══════════════════════════════════════════════════════════════
@@ -430,12 +431,12 @@ class _CategoriesPageState extends State<CategoriesPage> {
             classes: 'bg-transparent text-xs text-white focus:outline-none cursor-pointer font-semibold border-none pr-2',
             onChange: (values) {
               setState(() {
-                _sortBy = values.firstOrNull ?? 'default';
+                _sortByPopularity = (values.firstOrNull ?? 'default') == 'popularity';
               });
             },
             [
-              option(value: 'default', selected: _sortBy == 'default', [Component.text('Default')]),
-              option(value: 'popularity', selected: _sortBy == 'popularity', [Component.text('Popularity (High to Low)')]),
+              option(value: 'default', selected: !_sortByPopularity, [Component.text('Default')]),
+              option(value: 'popularity', selected: _sortByPopularity, [Component.text('Popularity (High to Low)')]),
             ],
           ),
         ]),
@@ -500,9 +501,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                 (c.description ?? '').toLowerCase().contains(term);
           }).toList();
 
-          if (_sortBy == 'popularity') {
-            filtered.sort((a, b) => (b.popularityScore ?? 0.0).compareTo(a.popularityScore ?? 0.0));
-          }
+          // Sorting is handled server-side via the provider params.
 
           if (filtered.isEmpty) {
             return div(
@@ -545,9 +544,11 @@ class _CategoriesPageState extends State<CategoriesPage> {
                     context,
                     category: cat,
                     onAddSubCategory: () {
+                      context.hideSidePanel();
                       _openCreateSubCategoryFormFor(cat);
                     },
                     onEditSubCategory: (sub) {
+                      context.hideSidePanel();
                       _openEditSubCategoryFormFor(cat, sub);
                     },
                     onDeleteSubCategory: (sub) {

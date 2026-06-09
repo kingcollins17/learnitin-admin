@@ -97,8 +97,11 @@ abstract class ApiService {
     @Query('per_page') int? perPage,
     @Query('is_public') bool? isPublic,
     @Query('level') String? level,
+    @Query('search') String? search,
     @Query('min_enrollees') int? minEnrollees,
     @Query('sort_by_popularity') bool? sortByPopularity,
+    @Query('category_id') int? categoryId,
+    @Query('sub_category_id') int? subCategoryId,
   });
 
   /// Generates a personalized course outline using AI.
@@ -194,9 +197,10 @@ abstract class ApiService {
 
   @GET('/courses/categories')
   Future<GenericApiResponse<List<CourseCategory>>> getCategories({
-    @Query('page') int? page,
-    @Query('per_page') int? perPage,
+    @Query('page') int? page = 1,
+    @Query('per_page') int? perPage = 200,
     @Query('search') String? search,
+    @Query('sort_by_popularity') bool? sortByPopularity = false,
   });
 
   @PATCH('/courses/categories/{category_id}')

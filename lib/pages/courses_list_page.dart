@@ -4,11 +4,12 @@ import 'package:jaspr/jaspr.dart';
 import 'package:jaspr_riverpod/jaspr_riverpod.dart';
 import 'package:jaspr_router/jaspr_router.dart';
 import 'package:learnitin_admin/components/course_create_outline_modal.dart';
-import 'package:learnitin_admin/components/course_edit_modal.dart';
+import 'package:learnitin_admin/components/course_edit_form.dart';
 import 'package:learnitin_admin/core/core.dart';
 import 'package:learnitin_admin/models/course_generation.dart';
 
 import '../providers/admin_course_provider.dart';
+import '../providers/category_provider.dart';
 import '../models/paginated_response.dart';
 import '../models/course.dart';
 
@@ -21,6 +22,12 @@ class CoursesListPage extends StatefulComponent {
 
 class _CoursesListPageState extends State<CoursesListPage> {
   bool _showCreateModal = false;
+  String? _searchQuery;
+  String? _level;
+  int? _minEnrollees;
+  bool _sortByPopularity = true;
+  int? _categoryId;
+  int? _subCategoryId;
 
   void _openCreateModal() {
     setState(() {
@@ -47,9 +54,19 @@ class _CoursesListPageState extends State<CoursesListPage> {
   Component build(BuildContext context) {
     final editingCourse = context.watch(editingCourseProvider);
 
+    final familyParams = (
+      sortByPopularity: _sortByPopularity,
+      minEnrollees: _minEnrollees,
+      search: _searchQuery,
+      level: _level,
+      categoryId: _categoryId,
+      subCategoryId: _subCategoryId,
+    );
+
     if (editingCourse != null) {
-      return CourseEditModal(
+      return CourseEditForm(
         course: editingCourse,
+        familyParams: familyParams,
         onClose: () => context.read(editingCourseProvider.notifier).state = null,
       );
     }
@@ -77,7 +94,23 @@ class _CoursesListPageState extends State<CoursesListPage> {
       ]),
 
       // ── Course List Table ────────────────────────────────────────
-      const _CoursesSection(),
+      _CoursesSection(
+        searchQuery: _searchQuery,
+        level: _level,
+        minEnrollees: _minEnrollees,
+        sortByPopularity: _sortByPopularity,
+        categoryId: _categoryId,
+        subCategoryId: _subCategoryId,
+        onSearchChanged: (q) => setState(() => _searchQuery = q),
+        onLevelChanged: (l) => setState(() => _level = l),
+        onMinEnrolleesChanged: (m) => setState(() => _minEnrollees = m),
+        onSortChanged: (sortByPop) => setState(() => _sortByPopularity = sortByPop),
+        onCategoryChanged: (c) => setState(() {
+          _categoryId = c;
+          _subCategoryId = null; // reset subcategory on category change
+        }),
+        onSubCategoryChanged: (sc) => setState(() => _subCategoryId = sc),
+      ),
 
       // ── Create Course Outline Modal ────────────────────────────────
       if (_showCreateModal)
@@ -89,9 +122,34 @@ class _CoursesListPageState extends State<CoursesListPage> {
   }
 }
 
-
 class _CoursesSection extends StatefulComponent {
-  const _CoursesSection();
+  final String? searchQuery;
+  final String? level;
+  final int? minEnrollees;
+  final bool sortByPopularity;
+  final int? categoryId;
+  final int? subCategoryId;
+  final ValueChanged<String?> onSearchChanged;
+  final ValueChanged<String?> onLevelChanged;
+  final ValueChanged<int?> onMinEnrolleesChanged;
+  final ValueChanged<bool> onSortChanged;
+  final ValueChanged<int?> onCategoryChanged;
+  final ValueChanged<int?> onSubCategoryChanged;
+
+  const _CoursesSection({
+    required this.searchQuery,
+    required this.level,
+    required this.minEnrollees,
+    required this.sortByPopularity,
+    required this.categoryId,
+    required this.subCategoryId,
+    required this.onSearchChanged,
+    required this.onLevelChanged,
+    required this.onMinEnrolleesChanged,
+    required this.onSortChanged,
+    required this.onCategoryChanged,
+    required this.onSubCategoryChanged,
+  });
 
   @override
   State<_CoursesSection> createState() => _CoursesSectionState();
@@ -99,54 +157,336 @@ class _CoursesSection extends StatefulComponent {
 
 class _CoursesSectionState extends State<_CoursesSection> {
   Timer? _debounce;
+  late String _localSearchQuery;
+
+  Timer? _categorySearchDebounce;
+  String _localCategorySearchQuery = '';
+  String _categorySearchQuery = '';
+  bool _isLoadingMoreCategories = false;
+  CourseCategory? _selectedCategory;
+
+  @override
+  void initState() {
+    super.initState();
+    _localSearchQuery = component.searchQuery ?? '';
+  }
+
+  @override
+  void didUpdateComponent(_CoursesSection oldComponent) {
+    super.didUpdateComponent(oldComponent);
+    if (component.searchQuery != oldComponent.searchQuery) {
+      _localSearchQuery = component.searchQuery ?? '';
+    }
+  }
 
   @override
   void dispose() {
     _debounce?.cancel();
+    _categorySearchDebounce?.cancel();
     super.dispose();
   }
 
-  void _onSearchChanged(String query, AdminCourseNotifier notifier) {
+  void _onSearchInput(String query) {
+    setState(() {
+      _localSearchQuery = query;
+    });
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
-      notifier.setSearch(query);
+      component.onSearchChanged(query.isEmpty ? null : query);
+    });
+  }
+
+  void _onCategorySearchInput(String query) {
+    setState(() {
+      _localCategorySearchQuery = query;
+    });
+    if (_categorySearchDebounce?.isActive ?? false) _categorySearchDebounce!.cancel();
+    _categorySearchDebounce = Timer(const Duration(milliseconds: 500), () {
+      setState(() {
+        _categorySearchQuery = query;
+      });
     });
   }
 
   @override
   Component build(BuildContext context) {
-    final coursesAsync = context.watch(adminCourseProvider);
-    final notifier = context.read(adminCourseProvider.notifier);
+    final paramsRecord = (
+      sortByPopularity: component.sortByPopularity,
+      minEnrollees: component.minEnrollees,
+      search: component.searchQuery,
+      level: component.level,
+      categoryId: component.categoryId,
+      subCategoryId: component.subCategoryId,
+    );
+    final coursesAsync = context.watch(adminCourseProvider(paramsRecord));
+    final notifier = context.read(adminCourseProvider(paramsRecord).notifier);
     final params = notifier.params;
+
+    final categoriesAsync = context.watch(categoriesProvider((search: _categorySearchQuery, sortByPopularity: null)));
+    final subCategoriesAsync = component.categoryId != null
+        ? context.watch(subCategoriesProvider(component.categoryId!))
+        : null;
 
     return div(classes: 'card overflow-hidden', [
       // Filters Header
-      div(classes: 'flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4', [
-        div(classes: 'flex flex-wrap items-center gap-3 w-full md:w-auto', [
-          // Search Input
-          div(classes: 'relative flex-1 md:flex-none md:min-w-[300px]', [
-            span(classes: 'absolute left-4 top-1/2 -translate-y-1/2 text-dark-muted', [Component.text('🔍')]),
-            input<String>(
-              type: InputType.text,
-              classes:
-                  'bg-dark-border/30 border border-dark-border rounded-xl pl-11 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all w-full',
-              value: params.search ?? '',
-              onInput: (value) => _onSearchChanged(value, notifier),
-            ),
-          ]),
-
-          // Refresh Button
-          button(
+      div(classes: 'flex flex-wrap items-center gap-4 mb-8 w-full', [
+        // Search Input
+        div(classes: 'relative flex-1 md:flex-none md:min-w-[240px]', [
+          span(classes: 'absolute left-4 top-1/2 -translate-y-1/2 text-dark-muted', [Component.text('🔍')]),
+          input<String>(
+            type: InputType.text,
             classes:
-                'p-2.5 rounded-xl bg-dark-border/30 border border-dark-border text-dark-muted hover:text-white hover:bg-dark-border/50 transition-all cursor-pointer',
-            onClick: () => notifier.refresh(),
-            [Component.text('🔄')],
+                'bg-dark-border/30 border border-dark-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all w-full',
+            value: _localSearchQuery,
+            onInput: _onSearchInput,
           ),
         ]),
 
-        div(classes: 'flex items-center space-x-2 text-sm text-dark-muted', [
+        // Category Filter with Search & Load More
+        div(classes: 'flex flex-col gap-1 min-w-[320px]', [
+          // Horizontal container: Search + Select
+          div(classes: 'flex items-center gap-2', [
+            // Search input
+            div(classes: 'relative flex-1 min-w-[120px]', [
+              input(
+                type: InputType.text,
+                classes:
+                    'bg-dark-border/30 border border-dark-border rounded-xl pl-3 pr-7 py-2.5 text-xs text-white placeholder:text-dark-muted/40 w-full focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all',
+                value: _localCategorySearchQuery,
+                attributes: {'placeholder': 'Search categories...'},
+                onInput: _onCategorySearchInput,
+              ),
+              if (_localCategorySearchQuery.isNotEmpty)
+                button(
+                  type: ButtonType.button,
+                  classes:
+                      'absolute right-2 top-1/2 -translate-y-1/2 text-xs text-dark-muted/50 hover:text-white transition-colors cursor-pointer',
+                  onClick: () {
+                    _onCategorySearchInput('');
+                  },
+                  [Component.text('✕')],
+                ),
+            ]),
+
+            // Dropdown select
+            div(classes: 'flex-[1.5] min-w-[150px]', [
+              categoriesAsync.when(
+                data: (categories) {
+                  // Update selected category cache if we find it in the current loaded list
+                  if (component.categoryId != null) {
+                    CourseCategory? found;
+                    for (final c in categories) {
+                      if (c.id == component.categoryId) {
+                        found = c;
+                        break;
+                      }
+                    }
+                    if (found != null) {
+                      _selectedCategory = found;
+                    }
+                  } else {
+                    _selectedCategory = null;
+                  }
+
+                  final displayedCategories = [...categories];
+                  if (component.categoryId != null && _selectedCategory != null) {
+                    final hasSelected = displayedCategories.any((c) => c.id == component.categoryId);
+                    if (!hasSelected) {
+                      displayedCategories.insert(0, _selectedCategory!);
+                    }
+                  }
+
+                  return select(
+                    classes:
+                        'bg-dark-border/30 border border-dark-border rounded-xl pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all cursor-pointer w-full appearance-none bg-[url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2371717A\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E")] bg-no-repeat bg-[right_0.75rem_center] bg-[length:1.25em_1.25em]',
+                    onChange: (values) {
+                      final val = values.firstOrNull;
+                      final parsedId = val == 'all' ? null : int.tryParse(val ?? '');
+                      setState(() {
+                        if (parsedId == null) {
+                          _selectedCategory = null;
+                        } else {
+                          CourseCategory? found;
+                          for (final c in displayedCategories) {
+                            if (c.id == parsedId) {
+                              found = c;
+                              break;
+                            }
+                          }
+                          _selectedCategory = found ?? _selectedCategory;
+                        }
+                      });
+                      component.onCategoryChanged(parsedId);
+                    },
+                    [
+                      option(value: 'all', selected: component.categoryId == null, [
+                        Component.text('All Categories'),
+                      ]),
+                      for (final cat in displayedCategories)
+                        option(
+                          value: cat.id.toString(),
+                          selected: component.categoryId == cat.id,
+                          [Component.text(cat.name ?? '')],
+                        ),
+                    ],
+                  );
+                },
+                loading: () => div(
+                  classes:
+                      'bg-dark-border/30 border border-dark-border rounded-xl px-4 py-2.5 text-sm text-dark-muted animate-pulse w-full',
+                  [Component.text('Loading...')],
+                ),
+                error: (e, __) => div(classes: 'text-xs text-red-400 py-2.5', [Component.text('Error')]),
+              ),
+            ]),
+          ]),
+
+          // Footer count + Load More below the horizontal layout
+          categoriesAsync.when(
+            data: (categories) {
+              final displayedCategories = [...categories];
+              if (component.categoryId != null && _selectedCategory != null) {
+                final hasSelected = displayedCategories.any((c) => c.id == component.categoryId);
+                if (!hasSelected) {
+                  displayedCategories.insert(0, _selectedCategory!);
+                }
+              }
+
+              final notifier = context.read(
+                categoriesProvider((search: _categorySearchQuery, sortByPopularity: null)).notifier,
+              );
+              final hasMore = notifier.hasMore;
+              final totalCount = displayedCategories.length;
+
+              return div(classes: 'flex items-center justify-between px-1 text-[9px]', [
+                span(classes: 'text-dark-muted/50', [
+                  Component.text('Showing $totalCount cats'),
+                ]),
+                if (hasMore)
+                  _isLoadingMoreCategories
+                      ? span(classes: 'text-dark-muted/50 animate-pulse', [Component.text('Loading...')])
+                      : button(
+                          type: ButtonType.button,
+                          classes:
+                              'text-primary hover:text-primary/80 font-semibold transition-colors cursor-pointer flex items-center space-x-1',
+                          onClick: () async {
+                            setState(() {
+                              _isLoadingMoreCategories = true;
+                            });
+                            try {
+                              await context
+                                  .read(
+                                    categoriesProvider((
+                                      search: _categorySearchQuery,
+                                      sortByPopularity: null,
+                                    )).notifier,
+                                  )
+                                  .loadMore();
+                            } finally {
+                              if (mounted) {
+                                setState(() {
+                                  _isLoadingMoreCategories = false;
+                                });
+                              }
+                            }
+                          },
+                          [
+                            Component.text('Load More ➔'),
+                          ],
+                        ),
+              ]);
+            },
+            loading: () => div([]),
+            error: (e, __) => div([]),
+          ),
+        ]),
+
+        // Subcategory Filter (Optional)
+        if (component.categoryId != null && subCategoriesAsync != null)
+          subCategoriesAsync.when(
+            data: (subCategories) => select(
+              classes:
+                  'bg-dark-border/30 border border-dark-border rounded-xl pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all cursor-pointer min-w-[140px] appearance-none bg-[url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2371717A\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E")] bg-no-repeat bg-[right_0.75rem_center] bg-[length:1.25em_1.25em]',
+              onChange: (values) {
+                final val = values.firstOrNull;
+                component.onSubCategoryChanged(val == 'all' ? null : int.tryParse(val ?? ''));
+              },
+              [
+                option(value: 'all', selected: component.subCategoryId == null, [
+                  Component.text('All Subcategories'),
+                ]),
+                for (final sub in subCategories)
+                  option(
+                    value: sub.id.toString(),
+                    selected: component.subCategoryId == sub.id,
+                    [Component.text(sub.name ?? '')],
+                  ),
+              ],
+            ),
+            loading: () => div(
+              classes:
+                  'bg-dark-border/30 border border-dark-border rounded-xl px-4 py-2.5 text-sm text-dark-muted animate-pulse min-w-[140px]',
+              [Component.text('Loading...')],
+            ),
+            error: (e, __) => div(classes: 'text-xs text-red-400', [Component.text('Error')]),
+          ),
+
+        // Level Filter
+        select(
+          classes:
+              'bg-dark-border/30 border border-dark-border rounded-xl pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all cursor-pointer min-w-[120px] appearance-none bg-[url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2371717A\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E")] bg-no-repeat bg-[right_0.75rem_center] bg-[length:1.25em_1.25em]',
+          onChange: (values) {
+            final val = values.firstOrNull;
+            component.onLevelChanged(val == 'all' ? null : val);
+          },
+          [
+            option(value: 'all', selected: component.level == null, [Component.text('All Levels')]),
+            option(value: 'beginner', selected: component.level == 'beginner', [Component.text('Beginner')]),
+            option(value: 'intermediate', selected: component.level == 'intermediate', [
+              Component.text('Intermediate'),
+            ]),
+            option(value: 'expert', selected: component.level == 'expert', [Component.text('Expert')]),
+          ],
+        ),
+
+        // Minimum Enrollees Filter
+        select(
+          classes:
+              'bg-dark-border/30 border border-dark-border rounded-xl pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all cursor-pointer min-w-[130px] appearance-none bg-[url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2371717A\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E")] bg-no-repeat bg-[right_0.75rem_center] bg-[length:1.25em_1.25em]',
+          onChange: (values) {
+            final val = values.firstOrNull;
+            component.onMinEnrolleesChanged(val == 'all' ? null : int.tryParse(val ?? ''));
+          },
+          [
+            option(value: 'all', selected: component.minEnrollees == null, [Component.text('All Enrollees')]),
+            option(value: '10', selected: component.minEnrollees == 10, [Component.text('10+ Learners')]),
+            option(value: '100', selected: component.minEnrollees == 100, [Component.text('100+ Learners')]),
+            option(value: '1000', selected: component.minEnrollees == 1000, [Component.text('1000+ Learners')]),
+          ],
+        ),
+
+        // Refresh Button
+        button(
+          classes:
+              'p-2.5 rounded-xl bg-dark-border/30 border border-dark-border text-dark-muted hover:text-white hover:bg-dark-border/50 transition-all cursor-pointer',
+          onClick: () => notifier.refresh(),
+          [Component.text('🔄')],
+        ),
+
+        // Sort By Filter
+        div(classes: 'flex items-center space-x-2 text-sm text-dark-muted ml-auto', [
           span([Component.text('Sorted by:')]),
-          span(classes: 'text-white font-medium', [Component.text('Newest First')]),
+          select(
+            classes: 'bg-transparent border-none text-white font-semibold focus:outline-none cursor-pointer',
+            onChange: (values) {
+              final val = values.firstOrNull;
+              component.onSortChanged(val == 'popularity');
+            },
+            [
+              option(value: 'newest', selected: component.sortByPopularity != true, [Component.text('Newest First')]),
+              option(value: 'popularity', selected: component.sortByPopularity == true, [Component.text('Popularity')]),
+            ],
+          ),
         ]),
       ]),
 
@@ -206,6 +546,20 @@ class _CoursesTable extends StatelessComponent {
 
   @override
   Component build(BuildContext context) {
+    final totalPages = pagination?.totalPages ?? 1;
+    final currentPage = pagination?.page ?? 1;
+
+    List<dynamic> pageRange = [];
+    if (totalPages <= 7) {
+      pageRange = List.generate(totalPages, (index) => index + 1);
+    } else if (currentPage <= 4) {
+      pageRange = [1, 2, 3, 4, 5, '...', totalPages];
+    } else if (currentPage >= totalPages - 3) {
+      pageRange = [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    } else {
+      pageRange = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+    }
+
     return div([
       div(classes: 'overflow-x-auto -mx-6', [
         table(classes: 'w-full', [
@@ -375,11 +729,15 @@ class _CoursesTable extends StatelessComponent {
             Component.text('Displaying '),
             span(classes: 'text-white font-bold', [
               Component.text(
-                '${(pagination!.page - 1) * pagination!.perPage + 1} - ${((pagination!.page - 1) * pagination!.perPage + courses.length)}',
+                '${(currentPage - 1) * pagination!.perPage + 1} - ${((currentPage - 1) * pagination!.perPage + courses.length)}',
               ),
             ]),
-            Component.text(' of '),
-            span(classes: 'text-white font-bold', [Component.text('${pagination!.total}')]),
+            if (courses.length < pagination!.perPage) ...[
+              Component.text(' of '),
+              span(classes: 'text-white font-bold', [
+                Component.text('${(currentPage - 1) * pagination!.perPage + courses.length}'),
+              ]),
+            ],
             Component.text(' items'),
           ]),
 
@@ -387,28 +745,28 @@ class _CoursesTable extends StatelessComponent {
             button(
               classes:
                   'flex items-center justify-center w-10 h-10 rounded-xl bg-dark-border/30 border border-dark-border text-dark-muted hover:text-white hover:bg-dark-border/50 disabled:opacity-20 disabled:cursor-not-allowed transition-all cursor-pointer',
-              attributes: pagination!.page <= 1 ? {'disabled': ''} : {},
-              onClick: () => onPageChange?.call(pagination!.page - 1),
+              attributes: currentPage <= 1 ? {'disabled': ''} : {},
+              onClick: () => onPageChange?.call(currentPage - 1),
               [Component.text('←')],
             ),
 
-            for (var i = 1; i <= pagination!.totalPages; i++)
-              if (i == 1 || i == pagination!.totalPages || (i >= pagination!.page - 1 && i <= pagination!.page + 1))
+            for (final pageToken in pageRange)
+              if (pageToken is int)
                 button(
                   classes:
                       'flex items-center justify-center w-10 h-10 rounded-xl border transition-all text-sm font-bold cursor-pointer '
-                      '${i == pagination!.page ? "bg-primary border-primary text-white shadow-lg shadow-primary/20" : "bg-dark-border/30 border-dark-border text-dark-muted hover:text-white hover:bg-dark-border/50"}',
-                  onClick: () => i != pagination!.page ? onPageChange?.call(i) : null,
-                  [Component.text('$i')],
+                      '${pageToken == currentPage ? "bg-primary border-primary text-white shadow-lg shadow-primary/20" : "bg-dark-border/30 border-dark-border text-dark-muted hover:text-white hover:bg-dark-border/50"}',
+                  onClick: () => pageToken != currentPage ? onPageChange?.call(pageToken) : null,
+                  [Component.text('$pageToken')],
                 )
-              else if (i == 2 || i == pagination!.totalPages - 1)
+              else
                 span(classes: 'text-dark-muted px-1.5', [Component.text('...')]),
 
             button(
               classes:
                   'flex items-center justify-center w-10 h-10 rounded-xl bg-dark-border/30 border border-dark-border text-dark-muted hover:text-white hover:bg-dark-border/50 disabled:opacity-20 disabled:cursor-not-allowed transition-all cursor-pointer',
-              attributes: (pagination!.page >= pagination!.totalPages || courses.isEmpty) ? {'disabled': ''} : {},
-              onClick: () => onPageChange?.call(pagination!.page + 1),
+              attributes: (currentPage >= totalPages || courses.isEmpty) ? {'disabled': ''} : {},
+              onClick: () => onPageChange?.call(currentPage + 1),
               [Component.text('→')],
             ),
           ]),

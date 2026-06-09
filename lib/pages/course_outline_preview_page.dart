@@ -39,7 +39,7 @@ class _CourseOutlinePreviewPageState extends State<CourseOutlinePreviewPage> {
 
     try {
       await context
-          .read(adminCourseProvider.notifier)
+          .read(adminCourseProvider(defaultAdminCourseParams).notifier)
           .createCourse(
             body: outline,
             categoryId: _selectedCategoryId,
@@ -79,7 +79,7 @@ class _CourseOutlinePreviewPageState extends State<CourseOutlinePreviewPage> {
       ]);
     }
 
-    final categoriesAsync = context.watch(categoriesProvider(null));
+    final categoriesAsync = context.watch(categoriesProvider((search: null, sortByPopularity: null)));
     final subCategoriesAsync = _selectedCategoryId != null
         ? context.watch(subCategoriesProvider(_selectedCategoryId!))
         : null;

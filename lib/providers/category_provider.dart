@@ -5,14 +5,18 @@ import 'package:learnitin_admin/core/utils/error_sanitizer.dart';
 import 'package:learnitin_admin/models/course.dart';
 import 'package:learnitin_admin/providers/api_provider.dart';
 
+/// Param record for [categoriesProvider] — carries search query and sort preference.
+typedef CategoriesParams = ({String? search, bool? sortByPopularity});
+
 /// A notifier that manages the state and CRUD operations for [CourseCategory] entities.
 class CategoriesNotifier extends AsyncNotifier<List<CourseCategory>> {
   final String? search;
+  final bool? sortByPopularity;
 
-  CategoriesNotifier({required this.search});
+  CategoriesNotifier({required this.search, required this.sortByPopularity});
 
   int _page = 1;
-  final int _perPage = 20;
+  final int _perPage = 100; // max is 100
   bool _hasMore = true;
 
   int get page => _page;
@@ -34,6 +38,7 @@ class CategoriesNotifier extends AsyncNotifier<List<CourseCategory>> {
         page: _page,
         perPage: _perPage,
         search: (search?.isNotEmpty == true) ? search : null,
+        sortByPopularity: sortByPopularity,
       );
       final categories = response.data ?? [];
 
@@ -159,9 +164,9 @@ class CategoriesNotifier extends AsyncNotifier<List<CourseCategory>> {
   }
 }
 
-final categoriesProvider = AsyncNotifierProvider.family<CategoriesNotifier, List<CourseCategory>, String?>((search) {
-  return CategoriesNotifier(search: search);
-});
+final categoriesProvider = AsyncNotifierProvider.family<CategoriesNotifier, List<CourseCategory>, CategoriesParams>(
+  (params) => CategoriesNotifier(search: params.search, sortByPopularity: params.sortByPopularity),
+);
 
 /// A notifier that manages the state and CRUD operations for [CourseSubCategory] entities.
 class SubCategoriesNotifier extends AsyncNotifier<List<CourseSubCategory>> {
